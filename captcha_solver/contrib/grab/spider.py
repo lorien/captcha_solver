@@ -21,14 +21,14 @@ class CaptchaSolverInterface(object):
         try:
             solution = self.solver.backend.parse_check_solution_response(grab.response)
         except SolutionNotReady:
-            logger.debug('SOLUTION IS NOT READY')
+            logger.debug('Solution is not ready')
             yield task.clone(delay=task.original_delay)
         else:
-            logger.debug('GOT CAPTCHA SOLUTION: %s' % solution)
+            logger.debug('Got captcha solution: %s' % solution)
             yield task.meta['handler'](solution, task.meta)
 
 
-def solve_captcha(solver, grab, url=None, **kwargs):
+def solve_captcha(solver, grab, url=None, delay=5, recognition_time=120, **kwargs):
     """
     :param solver: CaptchaService object
     :param grab: grab object with captcha image in body
@@ -60,13 +60,12 @@ def solve_captcha(solver, grab, url=None, **kwargs):
 
     captcha_id = solver.backend.parse_submit_captcha_response(antigate_grab.response)
     antigate_grab = solver.backend.get_check_solution_request(captcha_id)
-    antigate_grab = yield Task(grab=antigate_grab, delay=5)
 
-    while True:
+    for _ in xrange(0, recognition_time/delay, delay):
+        antigate_grab = yield Task(grab=antigate_grab, delay=delay)
         try:
             solver.backend.parse_check_solution_response(antigate_grab.response)
-            break
         except SolutionNotReady:
-            antigate_grab = yield Task(grab=antigate_grab, delay=5)
-        except CaptchaServiceError:
-            break
+            pass
+        else:
+            return
