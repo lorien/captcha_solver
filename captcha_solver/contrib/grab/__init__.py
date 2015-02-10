@@ -1,0 +1,1 @@
+from captcha_solver.contrib.grab.spider import solve_captcha, CaptchaSolverInterface

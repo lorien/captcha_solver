@@ -1,0 +1,15 @@
+# Common
+*.pyc
+*.pyo
+*.swp
+*.swo
+*.orig
+*.egg-info
+.idea
+
+# Project specific
+/.env
+/pip-log.txt
+/var/
+/.tox/
+/.coverage
