@@ -4,12 +4,10 @@ from grab.util.module import import_string
 from captcha_solver.const import BACKEND_ALIAS
 from captcha_solver.error import SolutionNotReady
 import time
-
-__all__ = ('CaptchaService',)
-logger = logging.getLogger('grab.captcha')
+logger = logging.getLogger('captcha_solver')
 
 
-class CaptchaService(object):
+class CaptchaSolver(object):
     """
     This class implements API to communicate with
     remote captcha solving service.
@@ -24,6 +22,7 @@ class CaptchaService(object):
         self.backend.setup(**kwargs)
 
     def submit_captcha(self, data, **kwargs):
+        logger.debug('Submiting captcha')
         g = self.backend.get_submit_captcha_request(data, **kwargs)
         g.request()
         return self.backend.parse_submit_captcha_response(g.response)
@@ -43,12 +42,9 @@ class CaptchaService(object):
         g = self.backend.get_submit_captcha_request(data, **kwargs)
         g.request()
         captcha_id = self.backend.parse_submit_captcha_response(g.response)
-        g = self.backend.get_check_solution_request(captcha_id)
-        g.request()
 
         for _ in xrange(0, recognition_time/delay, delay):
             try:
-                return self.backend.parse_check_solution_response(g.response)
+                return self.check_solution(captcha_id)
             except SolutionNotReady:
                 time.sleep(delay)
-                g.request()

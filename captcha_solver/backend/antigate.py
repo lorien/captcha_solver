@@ -4,6 +4,7 @@ try:
     from urllib import urlencode
 except ImportError:
     from urllib.parse import urlencode
+from urlparse import urljoin
 
 from grab import Grab
 from .base import CaptchaBackend
@@ -12,8 +13,9 @@ from captcha_solver import (CaptchaServiceError, ServiceTooBusy,
 
 
 class AntigateBackend(CaptchaBackend):
-    def setup(self, api_key):
+    def setup(self, api_key, domain='http://antigate.com'):
         self.api_key = api_key
+        self.domain = domain
 
     def get_submit_captcha_request(self, data, **kwargs):
         g = Grab()
@@ -24,7 +26,8 @@ class AntigateBackend(CaptchaBackend):
         }
         post.update(kwargs)
         g.setup(post=post)
-        g.setup(url='http://antigate.com/in.php')
+        url = urljoin(self.domain, 'in.php')
+        g.setup(url=url)
         return g
 
     def parse_submit_captcha_response(self, res):
@@ -42,7 +45,7 @@ class AntigateBackend(CaptchaBackend):
         
     def get_check_solution_request(self, captcha_id):
         params = {'key': self.api_key, 'action': 'get', 'id': captcha_id}
-        url = 'http://antigate.com/res.php?%s' % urlencode(params)
+        url = urljoin(self.domain, 'res.php?%s' % urlencode(params))
         g = Grab()
         g.setup(url=url)
         return g
