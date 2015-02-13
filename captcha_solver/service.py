@@ -1,11 +1,18 @@
 # coding:utf8
 import logging
+import importlib
+import time
 
-from grab.util.module import import_string
+
 from captcha_solver.const import SOlVER_BACKEND_ALIAS, TRANSPORT_BACKEND_ALIAS
 from captcha_solver.error import SolutionNotReady, SolutionTimeoutError
-import time
+
 logger = logging.getLogger('captcha_solver')
+
+
+def import_string(path):
+    module_path, cls_name = path.rsplit('.', 1)
+    return getattr(importlib.import_module(module_path), cls_name)
 
 
 class CaptchaSolver(object):

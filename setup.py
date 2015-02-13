@@ -7,7 +7,8 @@ version = __import__('captcha_solver').__version__
 setup(
     name = 'captcha-solver',
     version = version,
-    description = 'API to help with recognizing captcha',
+    description = 'Universal API to different captcha solving services',
+    long_description = open(os.path.join(ROOT, 'README.rst')).read(),
     author = 'Gregory Petukhov',
     author_email = 'lorien@lorien.name',
     packages = find_packages(),
