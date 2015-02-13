@@ -1,5 +1,5 @@
 __all__ = ('CaptchaError', 'CaptchaServiceError', 'SolutionNotReady',
-           'ServiceTooBusy', 'BalanceTooLow')
+           'ServiceTooBusy', 'BalanceTooLow', 'SolutionTimeoutError')
 
 
 class CaptchaError(Exception):
@@ -11,6 +11,10 @@ class CaptchaServiceError(CaptchaError):
 
 
 class SolutionNotReady(CaptchaServiceError):
+    pass
+
+
+class SolutionTimeoutError(SolutionNotReady):
     pass
 
 

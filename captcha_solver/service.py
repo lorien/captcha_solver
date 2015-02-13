@@ -1,8 +1,8 @@
 import logging
 
 from grab.util.module import import_string
-from captcha_solver.const import BACKEND_ALIAS
-from captcha_solver.error import SolutionNotReady
+from captcha_solver.const import SOlVER_BACKEND_ALIAS
+from captcha_solver.error import SolutionNotReady, SolutionTimeoutError
 import time
 logger = logging.getLogger('captcha_solver')
 
@@ -14,8 +14,8 @@ class CaptchaSolver(object):
     """
 
     def __init__(self, backend, **kwargs):
-        if backend in BACKEND_ALIAS:
-            backend_path = BACKEND_ALIAS[backend]
+        if backend in SOlVER_BACKEND_ALIAS:
+            backend_path = SOlVER_BACKEND_ALIAS[backend]
         else:
             backend_path = backend
         self.backend = import_string(backend_path)()
@@ -48,3 +48,5 @@ class CaptchaSolver(object):
                 return self.check_solution(captcha_id)
             except SolutionNotReady:
                 time.sleep(delay)
+        else:
+            raise SolutionTimeoutError

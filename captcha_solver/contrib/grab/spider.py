@@ -3,7 +3,7 @@ import logging
 from grab.spider.task import Task
 from captcha_solver.error import SolutionNotReady, CaptchaServiceError
 
-logger = logging.getLogger('grab.spider.mixin.captcha_solver')
+logger = logging.getLogger('grab.spider.captcha')
 
 
 class CaptchaSolverInterface(object):
