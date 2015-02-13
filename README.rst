@@ -2,11 +2,11 @@
 Captcha Solver
 ==============
 
-.. image:: https://travis-ci.org/lorien/captcha-solver.png
-    :target: https://travis-ci.org/lorien/captcha-solver
+.. image:: https://travis-ci.org/lorien/captcha_solver.svg?branch=master
+    :target: https://travis-ci.org/lorien/captcha_solver
 
-.. image:: https://coveralls.io/repos/lorien/captcha-solver/badge.svg
-    :target: https://coveralls.io/r/lorien/captcha-solver
+.. image:: https://coveralls.io/repos/lorien/captcha_solver/badge.svg
+    :target: https://coveralls.io/r/lorien/captcha_solver
 
 
 Univeral API to different captcha solving services.
