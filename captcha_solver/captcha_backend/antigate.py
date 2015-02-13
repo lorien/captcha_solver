@@ -7,29 +7,25 @@ except ImportError:
 from urlparse import urljoin
 
 
-from captcha_solver.backend.base import CaptchaBackend
+from captcha_solver.captcha_backend.base import CaptchaBackend
 from captcha_solver import (CaptchaServiceError, ServiceTooBusy,
                                 BalanceTooLow, SolutionNotReady)
 
 
 class AntigateBackend(CaptchaBackend):
     def setup(self, api_key, service_url='http://antigate.com', **kwargs):
-        super(AntigateBackend, self).setup(**kwargs)
         self.api_key = api_key
         self.service_url = service_url
 
-    def get_submit_captcha_request(self, data, **kwargs):
-        t = self.Transport()
+    def get_submit_captcha_request_data(self, data, **kwargs):
         post = {
             'key': self.api_key,
             'method': 'base64',
             'body': b64encode(data),
         }
         post.update(kwargs)
-        t.setup(post=post)
         url = urljoin(self.service_url, 'in.php')
-        t.setup(url=url)
-        return t
+        return {'url': url, 'post_data': post}
 
     def parse_submit_captcha_response(self, res):
         if res.code == 200:
@@ -44,12 +40,10 @@ class AntigateBackend(CaptchaBackend):
         else:
             raise CaptchaServiceError('Returned HTTP code: %d' % res.code)
         
-    def get_check_solution_request(self, captcha_id):
+    def get_check_solution_request_data(self, captcha_id):
         params = {'key': self.api_key, 'action': 'get', 'id': captcha_id}
         url = urljoin(self.service_url, 'res.php?%s' % urlencode(params))
-        t = self.Transport()
-        t.setup(url=url)
-        return t
+        return {'url': url, 'post_data': None}
 
     def parse_check_solution_response(self, res):
         if res.code == 200:

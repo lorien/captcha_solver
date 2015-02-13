@@ -1,7 +1,8 @@
+# coding:utf8
 import logging
 
 from grab.util.module import import_string
-from captcha_solver.const import SOlVER_BACKEND_ALIAS
+from captcha_solver.const import SOlVER_BACKEND_ALIAS, TRANSPORT_BACKEND_ALIAS
 from captcha_solver.error import SolutionNotReady, SolutionTimeoutError
 import time
 logger = logging.getLogger('captcha_solver')
@@ -13,19 +14,18 @@ class CaptchaSolver(object):
     remote captcha solving service.
     """
 
-    def __init__(self, backend, **kwargs):
-        if backend in SOlVER_BACKEND_ALIAS:
-            backend_path = SOlVER_BACKEND_ALIAS[backend]
-        else:
-            backend_path = backend
-        self.backend = import_string(backend_path)()
-        self.backend.setup(**kwargs)
+    def __init__(self, captcha_backend, network_backend='urllib', **kwargs):
+        captcha_backend_path = SOlVER_BACKEND_ALIAS.get(captcha_backend, captcha_backend)
+        network_backend_path = TRANSPORT_BACKEND_ALIAS.get(network_backend, network_backend)
+        self.captcha_backend = import_string(captcha_backend_path)()
+        self.network_backend = import_string(network_backend_path)()
+        self.captcha_backend.setup(**kwargs)
 
-    def submit_captcha(self, data, **kwargs):
+    def submit_captcha(self, image_data, **kwargs):
         logger.debug('Submiting captcha')
-        g = self.backend.get_submit_captcha_request(data, **kwargs)
-        g.request()
-        return self.backend.parse_submit_captcha_response(g.response)
+        data = self.captcha_backend.get_submit_captcha_request_data(image_data, **kwargs)
+        response = self.network_backend.request(data['url'], data['post_data'])
+        return self.captcha_backend.parse_submit_captcha_response(response)
 
     def check_solution(self, captcha_id):
         """
@@ -34,14 +34,12 @@ class CaptchaSolver(object):
         * ServiceTooBusy
         """
 
-        g = self.backend.get_check_solution_request(captcha_id)
-        g.request()
-        return self.backend.parse_check_solution_response(g.response)
+        data = self.captcha_backend.get_check_solution_request_data(captcha_id)
+        response = self.network_backend.request(data['url'], data['post_data'])
+        return self.captcha_backend.parse_check_solution_response(response)
 
     def solve_captcha(self, data, recognition_time=120, delay=5, **kwargs):
-        g = self.backend.get_submit_captcha_request(data, **kwargs)
-        g.request()
-        captcha_id = self.backend.parse_submit_captcha_response(g.response)
+        captcha_id = self.submit_captcha(image_data=data)
 
         for _ in xrange(0, recognition_time/delay, delay):
             try:
@@ -49,4 +47,4 @@ class CaptchaSolver(object):
             except SolutionNotReady:
                 time.sleep(delay)
         else:
-            raise SolutionTimeoutError
+            raise SolutionTimeoutError("Captcha is not ready after %s seconds" % recognition_time)

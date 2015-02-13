@@ -9,8 +9,8 @@ try:
 except ImportError:
     from io import StringIO
 
-from grab import Grab
-from captcha_solver.backend.base import CaptchaBackend
+
+from captcha_solver.captcha_backend.base import CaptchaBackend
 
 pygtk.require('2.0')
 
@@ -52,23 +52,19 @@ class CaptchaWindow(object):
 
 
 class GuiBackend(CaptchaBackend):
-    def get_submit_captcha_request(self, data):
+    def get_submit_captcha_request_data(self, data):
         fd, path = tempfile.mkstemp()
         with open(path, 'w') as out:
             out.write(data)
         url = 'file://' + path
-        g = Grab()
-        g.setup(url=url)
-        return g
+        return {'url': url, 'post_data': None}
 
     def parse_submit_captcha_response(self, res):
         return res.url.replace('file://', '')
 
-    def get_check_solution_request(self, captcha_id):
+    def get_check_solution_request_data(self, captcha_id):
         url = 'file://' + captcha_id
-        g = Grab()
-        g.setup(url=url)
-        return g
+        return {'url': url, 'post_data': None}
 
     def parse_check_solution_response(self, res):
         path = res.url.replace('file://', '')
