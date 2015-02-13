@@ -1,9 +1,15 @@
-========
+==============
 Captcha Solver
-========
+==============
+
+.. image:: https://travis-ci.org/lorien/captcha-solver.png
+    :target: https://travis-ci.org/lorien/captcha-solver
+
+.. image:: https://coveralls.io/repos/lorien/captcha-solver/badge.svg
+    :target: https://coveralls.io/r/lorien/captcha-solver
 
 
-API to recognize captcha
+Univeral API to different captcha solving services.
 
 
 Usage Example
@@ -11,12 +17,6 @@ Usage Example
 
 Example::
 
-    from captcha_solver import CaptchaService
-    solver = CaptchaService('browser')
-    print solver.solve_captcha(image)
-
-
-Dependencies
-============
-
-* grab
+    from captcha_solver import CaptchaSolver
+    solver = CaptchaSolver('browser')
+    print(solver.solve_captcha(image))
