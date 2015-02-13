@@ -28,17 +28,17 @@ class AntigateBackend(CaptchaBackend):
         return {'url': url, 'post_data': post}
 
     def parse_submit_captcha_response(self, res):
-        if res.code == 200:
-            if res.body.startswith('OK|'):
-                return res.body.split('|', 1)[1]
-            elif res.body == 'ERROR_NO_SLOT_AVAILABLE':
+        if res['code'] == 200:
+            if res['body'].startswith('OK|'):
+                return res['body'].split('|', 1)[1]
+            elif res['body'] == 'ERROR_NO_SLOT_AVAILABLE':
                 raise ServiceTooBusy('Service too busy')
-            elif res.body == 'ERROR_ZERO_BALANCE':
+            elif res['body'] == 'ERROR_ZERO_BALANCE':
                 raise BalanceTooLow('Balance too low')
             else:
-                raise CaptchaServiceError(res.body)
+                raise CaptchaServiceError(res['body'])
         else:
-            raise CaptchaServiceError('Returned HTTP code: %d' % res.code)
+            raise CaptchaServiceError('Returned HTTP code: %d' % res['code'])
         
     def get_check_solution_request_data(self, captcha_id):
         params = {'key': self.api_key, 'action': 'get', 'id': captcha_id}
@@ -46,12 +46,12 @@ class AntigateBackend(CaptchaBackend):
         return {'url': url, 'post_data': None}
 
     def parse_check_solution_response(self, res):
-        if res.code == 200:
-            if res.body.startswith('OK|'):
-                return res.body.split('|', 1)[1]
-            elif res.body == 'CAPCHA_NOT_READY':
+        if res['code'] == 200:
+            if res['body'].startswith('OK|'):
+                return res['body'].split('|', 1)[1]
+            elif res['body'] == 'CAPCHA_NOT_READY':
                 raise SolutionNotReady('Solution not ready')
             else:
-                raise CaptchaServiceError(res.body)
+                raise CaptchaServiceError(res['body'])
         else:
-            raise CaptchaServiceError('Returned HTTP code: %d' % res.code)
+            raise CaptchaServiceError('Returned HTTP code: %d' % res['code'])

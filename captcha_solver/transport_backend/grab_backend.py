@@ -7,7 +7,7 @@ class GrabBackend(object):
         if data:
             g.setup(post=data)
         g.go(url)
-        return g.response
+        return {'code': g.doc.code, 'body': g.doc.body}
 
     def make_grab_instance(self, url, data):
         g = Grab()

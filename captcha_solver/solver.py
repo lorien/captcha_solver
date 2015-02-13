@@ -3,9 +3,9 @@ import logging
 import importlib
 import time
 
-
-from captcha_solver.const import SOlVER_BACKEND_ALIAS, TRANSPORT_BACKEND_ALIAS
+from captcha_solver.const import SOLVER_BACKEND_ALIAS, TRANSPORT_BACKEND_ALIAS
 from captcha_solver.error import SolutionNotReady, SolutionTimeoutError
+
 
 logger = logging.getLogger('captcha_solver')
 
@@ -22,7 +22,7 @@ class CaptchaSolver(object):
     """
 
     def __init__(self, captcha_backend, network_backend='urllib', **kwargs):
-        captcha_backend_path = SOlVER_BACKEND_ALIAS.get(captcha_backend, captcha_backend)
+        captcha_backend_path = SOLVER_BACKEND_ALIAS.get(captcha_backend, captcha_backend)
         network_backend_path = TRANSPORT_BACKEND_ALIAS.get(network_backend, network_backend)
         self.captcha_backend = import_string(captcha_backend_path)()
         self.network_backend = import_string(network_backend_path)()
@@ -54,4 +54,4 @@ class CaptchaSolver(object):
             except SolutionNotReady:
                 time.sleep(delay)
         else:
-            raise SolutionTimeoutError("Captcha is not ready after %s seconds" % recognition_time)
+           raise SolutionTimeoutError("Captcha is not ready after %s seconds" % recognition_time)

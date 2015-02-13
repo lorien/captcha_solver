@@ -5,8 +5,9 @@ import sys
 from copy import copy
 import os
 
+
 TEST_LIST = (
-    'test.service',
+    'test.solver',
 )
 
 

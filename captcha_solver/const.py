@@ -1,4 +1,4 @@
-SOlVER_BACKEND_ALIAS = {
+SOLVER_BACKEND_ALIAS = {
     'antigate': 'captcha_solver.captcha_backend.antigate.AntigateBackend',
     'browser': 'captcha_solver.captcha_backend.browser.BrowserBackend',
     'gui': 'captcha_solver.captcha_backend.gui.GuiBackend',

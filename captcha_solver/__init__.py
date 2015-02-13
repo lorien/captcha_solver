@@ -1,4 +1,4 @@
-from captcha_solver.service import CaptchaSolver
+from captcha_solver.solver import CaptchaSolver
 from captcha_solver.error import *
 
 version_info = (0, 0, 1)
