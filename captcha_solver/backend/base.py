@@ -1,5 +1,6 @@
+import importlib
+
 from captcha_solver.const import TRANSPORT_BACKEND_ALIAS
-from grab.util.module import import_string
 
 
 class CaptchaBackend(object):
@@ -8,4 +9,5 @@ class CaptchaBackend(object):
             backend_path = TRANSPORT_BACKEND_ALIAS[transport]
         else:
             backend_path = transport
-        self.Transport = import_string(backend_path)
+        module_path, cls_name = backend_path.rsplit('.', 1)
+        self.Transport = getattr(importlib.import_module(module_path), cls_name)

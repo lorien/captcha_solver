@@ -1,9 +1,10 @@
 import logging
+import importlib
+import time
 
-from grab.util.module import import_string
 from captcha_solver.const import SOlVER_BACKEND_ALIAS
 from captcha_solver.error import SolutionNotReady, SolutionTimeoutError
-import time
+
 logger = logging.getLogger('captcha_solver')
 
 
@@ -18,7 +19,9 @@ class CaptchaSolver(object):
             backend_path = SOlVER_BACKEND_ALIAS[backend]
         else:
             backend_path = backend
-        self.backend = import_string(backend_path)()
+
+        module_path, cls_name = backend_path.rsplit('.', 1)
+        self.backend = getattr(importlib.import_module(module_path), cls_name)()
         self.backend.setup(**kwargs)
 
     def submit_captcha(self, data, **kwargs):
