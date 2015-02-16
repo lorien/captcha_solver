@@ -13,4 +13,4 @@ class UrllibBackend(object):
             request = urllib2.Request(url, None)
         response = urllib2.urlopen(request)
         body = response.read()
-        return {'code': response.getcode(), 'body': response}
+        return {'code': response.getcode(), 'body': body}

@@ -1,36 +1,112 @@
 from unittest import TestCase
 from mock import patch
+from grab import Grab
 from urlparse import urljoin
-import logging
+from urllib import addinfourl
+from StringIO import StringIO
 
 from captcha_solver.error import *
 from captcha_solver import CaptchaSolver
 
 
-logging.basicConfig(level=logging.DEBUG)
-
-
-class AntigateBackendTestCase(TestCase):
+class AntigateBackendUrllibTransportTestCase(TestCase):
     def setup_solver(self):
         self.service_url = 'http://antigate.com'
-        self.solver = CaptchaSolver('antigate', service_url=self.service_url, api_key='does not matter')
+        self.solver = CaptchaSolver('antigate',
+                                    network_backend='urllib',
+                                    service_url=self.service_url,
+                                    api_key='does not matter')
 
     def setUp(self):
         self.setup_solver()
-        self.patcher = patch.object(self.solver.network_backend, 'request', autospec=True)
+        self.patcher = patch('urllib2.urlopen')
+        self.mock_urlopen = self.patcher.start()
+
+    def tearDown(self):
+        self.patcher.stop()
+
+    def test_antigate_decoded(self):
+        def urlopen(url, data=None, timeout=None):
+            url = url.get_full_url()
+            submit_url = urljoin(self.service_url, 'in.php')
+            check_url = urljoin(self.service_url, 'res.php')
+            if url == submit_url:
+                return addinfourl(StringIO('OK|captcha_id'), {}, url, 200)
+            elif url.startswith(check_url):
+                return addinfourl(StringIO('OK|decoded_captcha'), {}, url, 200)
+            else:
+                raise Exception('Invalid test')
+
+        self.mock_urlopen.side_effect = urlopen
+        self.assertEqual(self.solver.solve_captcha('image_data'), 'decoded_captcha')
+
+    def test_antigate_no_slot_available(self):
+        def urlopen(url, data=None, timeout=None):
+            url = url.get_full_url()
+            submit_url = urljoin(self.service_url, 'in.php')
+            if url == submit_url:
+                return addinfourl(StringIO('ERROR_NO_SLOT_AVAILABLE'), {}, url, 200)
+            else:
+                raise Exception('Invalid test')
+
+        self.mock_urlopen.side_effect = urlopen
+        self.assertRaises(ServiceTooBusy, self.solver.solve_captcha, 'image_data')
+
+    def test_antigate_zero_balance(self):
+        def urlopen(url, data=None, timeout=None):
+            url = url.get_full_url()
+            submit_url = urljoin(self.service_url, 'in.php')
+            if url == submit_url:
+                return addinfourl(StringIO('ERROR_ZERO_BALANCE'), {}, url, 200)
+            else:
+                raise Exception('Invalid test')
+
+        self.mock_urlopen.side_effect = urlopen
+        self.assertRaises(BalanceTooLow, self.solver.solve_captcha, 'image_data')
+
+    def test_solution_timeout_error(self):
+        def urlopen(url, data=None, timeout=None):
+            url = url.get_full_url()
+            submit_url = urljoin(self.service_url, 'in.php')
+            check_url = urljoin(self.service_url, 'res.php')
+            if url == submit_url:
+                return addinfourl(StringIO('OK|captcha_id'), {}, url, 200)
+            elif url.startswith(check_url):
+                return addinfourl(StringIO('CAPCHA_NOT_READY'), {}, url, 200)
+            else:
+                raise Exception('Invalid test')
+
+        self.mock_urlopen.side_effect = urlopen
+        self.assertRaises(SolutionTimeoutError, self.solver.solve_captcha,
+                          'image_data', recognition_time=1, delay=1)
+
+
+class AntigateBackendGrabTransportTestCase(TestCase):
+    def setup_solver(self):
+        self.service_url = 'http://antigate.com'
+        self.solver = CaptchaSolver('antigate',
+                                    network_backend='grab',
+                                    service_url=self.service_url,
+                                    api_key='does not matter')
+
+    def setUp(self):
+        self.setup_solver()
+        self.patcher = patch.object(Grab, 'request', autospec=True)
         self.mock_request = self.patcher.start()
 
     def tearDown(self):
         self.patcher.stop()
 
     def test_antigate_decoded(self):
-        def request(url, data):
+        def request(g):
             submit_url = urljoin(self.service_url, 'in.php')
             check_url = urljoin(self.service_url, 'res.php')
-            if url == submit_url:
-                return {'code': 200, 'body': 'OK|captcha_id'}
-            elif url.startswith(check_url):
-                return {'code': 200, 'body': 'OK|decoded_captcha'}
+            if g.config['url'] == submit_url:
+                g.response.body = 'OK|captcha_id'
+                g.response.code = 200
+            elif g.config['url'].startswith(check_url):
+                g.response.code = 200
+                g.response.body = 'OK|decoded_captcha'
             else:
                 raise Exception('Invalid test')
 
@@ -38,10 +114,11 @@ class AntigateBackendTestCase(TestCase):
         self.assertEqual(self.solver.solve_captcha('image_data'), 'decoded_captcha')
 
     def test_antigate_no_slot_available(self):
-        def request(url, data):
+        def request(g):
             submit_url = urljoin(self.service_url, 'in.php')
-            if url == submit_url:
-                return {'code': 200, 'body': 'ERROR_NO_SLOT_AVAILABLE'}
+            if g.config['url'] == submit_url:
+                g.response.body = 'ERROR_NO_SLOT_AVAILABLE'
+                g.response.code = 200
             else:
                 raise Exception('Invalid test')
 
@@ -49,35 +126,48 @@ class AntigateBackendTestCase(TestCase):
         self.assertRaises(ServiceTooBusy, self.solver.solve_captcha, 'image_data')
 
     def test_antigate_zero_balance(self):
-        def request(url, data):
+        def request(g):
             submit_url = urljoin(self.service_url, 'in.php')
-            if url == submit_url:
-                return {'code': 200,  'body': 'ERROR_ZERO_BALANCE'}
+            if g.config['url'] == submit_url:
+                g.response.body = 'ERROR_ZERO_BALANCE'
+                g.response.code = 200
             else:
                 raise Exception('Invalid test')
 
         self.mock_request.side_effect = request
         self.assertRaises(BalanceTooLow, self.solver.solve_captcha, 'image_data')
 
-    """
     def test_solution_timeout_error(self):
-        def request(url, data):
+        def request(g):
             submit_url = urljoin(self.service_url, 'in.php')
             check_url = urljoin(self.service_url, 'res.php')
-            if url == submit_url:
-                return {'code': 200, 'body': 'OK|captcha_id'}
-            elif url.startswith(check_url):
-                return {'code': 200, 'body': 'CAPTCHA_NOT_READY'}
+            if g.config['url'] == submit_url:
+                g.response.body = 'OK|captcha_id'
+                g.response.code = 200
+            elif g.config['url'].startswith(check_url):
+                g.response.code = 200
+                g.response.body = 'CAPCHA_NOT_READY'
             else:
                 raise Exception('Invalid test')
 
         self.mock_request.side_effect = request
         self.assertRaises(SolutionTimeoutError, self.solver.solve_captcha,
                           'image_data', recognition_time=1, delay=1)
-    """
 
 
-class TWOCaptchaBackendTestCase(AntigateBackendTestCase):
+class TWOCaptchaBackendGrabTransportTestCase(AntigateBackendGrabTransportTestCase):
     def setup_solver(self):
         self.service_url = 'http://2captcha.com'
-        self.solver = CaptchaSolver('antigate', service_url=self.service_url, api_key='does not matter')
+        self.solver = CaptchaSolver('antigate',
+                                    network_backend='grab',
+                                    service_url=self.service_url,
+                                    api_key='does not matter')
+
+
+class TWOCaptchaBackendUrllibTransportTestCase(AntigateBackendUrllibTransportTestCase):
+    def setup_solver(self):
+        self.service_url = 'http://2captcha.com'
+        self.solver = CaptchaSolver('antigate',
+                                    network_backend='urllib',
+                                    service_url=self.service_url,
+                                    api_key='does not matter')

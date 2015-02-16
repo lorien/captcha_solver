@@ -54,4 +54,4 @@ class CaptchaSolver(object):
             except SolutionNotReady:
                 time.sleep(delay)
         else:
-           raise SolutionTimeoutError("Captcha is not ready after %s seconds" % recognition_time)
+            raise SolutionTimeoutError("Captcha is not ready after %s seconds" % recognition_time)

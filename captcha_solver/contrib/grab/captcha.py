@@ -11,13 +11,13 @@ RE_SRC = re.compile(r'src="([^"]+)"')
 logger = logging.getLogger('grab.captcha')
 
 
-def solve_captcha(self, solver, g, url=None, data=None, **kwargs):
+def solve_captcha(self, solver, g, url=None, data=None, resolving_time=30, busy_delay=5, **kwargs):
     if url:
         logger.debug('Downloading captcha')
         g.request(url=url)
         data = g.response.body
 
-    for _ in xrange(0, 5):
+    for _ in xrange(0, resolving_time/busy_delay, busy_delay):
         logger.debug('Solving captcha')
         try:
             solution = self.solver.solve_captcha(data=data, **kwargs)
