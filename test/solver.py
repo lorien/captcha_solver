@@ -13,8 +13,6 @@ try:
     from urllib import addinfourl
 except ImportError:
     from urllib.response import addinfourl
-import six
-
 from captcha_solver.error import *
 from captcha_solver import CaptchaSolver
 
@@ -29,10 +27,7 @@ class AntigateBackendUrllibTransportTestCase(TestCase):
 
     def setUp(self):
         self.setup_solver()
-        if six.PY2:
-            self.patcher = patch('urllib2.urlopen')
-        else:
-            self.patcher = patch('urllib.request.urlopen')
+        self.patcher = patch('captcha_solver.transport_backend.urllib_backend.urlopen')
         self.mock_urlopen = self.patcher.start()
 
     def tearDown(self):
@@ -58,7 +53,7 @@ class AntigateBackendUrllibTransportTestCase(TestCase):
             url = url.get_full_url()
             submit_url = urljoin(self.service_url, 'in.php')
             if url == submit_url:
-                return addinfourl(BytesIO('ERROR_NO_SLOT_AVAILABLE'), {}, url, 200)
+                return addinfourl(BytesIO(b'ERROR_NO_SLOT_AVAILABLE'), {}, url, 200)
             else:
                 raise Exception('Invalid test')
 
@@ -70,7 +65,7 @@ class AntigateBackendUrllibTransportTestCase(TestCase):
             url = url.get_full_url()
             submit_url = urljoin(self.service_url, 'in.php')
             if url == submit_url:
-                return addinfourl(BytesIO('ERROR_ZERO_BALANCE'), {}, url, 200)
+                return addinfourl(BytesIO(b'ERROR_ZERO_BALANCE'), {}, url, 200)
             else:
                 raise Exception('Invalid test')
 
@@ -83,9 +78,9 @@ class AntigateBackendUrllibTransportTestCase(TestCase):
             submit_url = urljoin(self.service_url, 'in.php')
             check_url = urljoin(self.service_url, 'res.php')
             if url == submit_url:
-                return addinfourl(BytesIO('OK|captcha_id'), {}, url, 200)
+                return addinfourl(BytesIO(b'OK|captcha_id'), {}, url, 200)
             elif url.startswith(check_url):
-                return addinfourl(BytesIO('CAPCHA_NOT_READY'), {}, url, 200)
+                return addinfourl(BytesIO(b'CAPCHA_NOT_READY'), {}, url, 200)
             else:
                 raise Exception('Invalid test')
 
@@ -115,57 +110,57 @@ class AntigateBackendGrabTransportTestCase(TestCase):
             submit_url = urljoin(self.service_url, 'in.php')
             check_url = urljoin(self.service_url, 'res.php')
             if g.config['url'] == submit_url:
-                g.response.body = 'OK|captcha_id'
+                g.response.body = b'OK|captcha_id'
                 g.response.code = 200
             elif g.config['url'].startswith(check_url):
                 g.response.code = 200
-                g.response.body = 'OK|decoded_captcha'
+                g.response.body = b'OK|decoded_captcha'
             else:
                 raise Exception('Invalid test')
 
         self.mock_request.side_effect = request
-        self.assertEqual(self.solver.solve_captcha('image_data'), 'decoded_captcha')
+        self.assertEqual(self.solver.solve_captcha(b'image_data'), 'decoded_captcha')
 
     def test_antigate_no_slot_available(self):
         def request(g):
             submit_url = urljoin(self.service_url, 'in.php')
             if g.config['url'] == submit_url:
-                g.response.body = 'ERROR_NO_SLOT_AVAILABLE'
+                g.response.body = b'ERROR_NO_SLOT_AVAILABLE'
                 g.response.code = 200
             else:
                 raise Exception('Invalid test')
 
         self.mock_request.side_effect = request
-        self.assertRaises(ServiceTooBusy, self.solver.solve_captcha, 'image_data')
+        self.assertRaises(ServiceTooBusy, self.solver.solve_captcha, b'image_data')
 
     def test_antigate_zero_balance(self):
         def request(g):
             submit_url = urljoin(self.service_url, 'in.php')
             if g.config['url'] == submit_url:
-                g.response.body = 'ERROR_ZERO_BALANCE'
+                g.response.body = b'ERROR_ZERO_BALANCE'
                 g.response.code = 200
             else:
                 raise Exception('Invalid test')
 
         self.mock_request.side_effect = request
-        self.assertRaises(BalanceTooLow, self.solver.solve_captcha, 'image_data')
+        self.assertRaises(BalanceTooLow, self.solver.solve_captcha, b'image_data')
 
     def test_solution_timeout_error(self):
         def request(g):
             submit_url = urljoin(self.service_url, 'in.php')
             check_url = urljoin(self.service_url, 'res.php')
             if g.config['url'] == submit_url:
-                g.response.body = 'OK|captcha_id'
+                g.response.body = b'OK|captcha_id'
                 g.response.code = 200
             elif g.config['url'].startswith(check_url):
                 g.response.code = 200
-                g.response.body = 'CAPCHA_NOT_READY'
+                g.response.body = b'CAPCHA_NOT_READY'
             else:
                 raise Exception('Invalid test')
 
         self.mock_request.side_effect = request
         self.assertRaises(SolutionTimeoutError, self.solver.solve_captcha,
-                          'image_data', recognition_time=1, delay=1)
+                          b'image_data', recognition_time=1, delay=1)
 
 
 class TWOCaptchaBackendGrabTransportTestCase(AntigateBackendGrabTransportTestCase):
