@@ -2,11 +2,10 @@ from setuptools import setup, find_packages
 import os
 
 ROOT = os.path.dirname(os.path.realpath(__file__))
-version = __import__('captcha_solver').__version__
 
 setup(
     name = 'captcha-solver',
-    version = version,
+    version = '0.0.1'
     description = 'Universal API to different captcha solving services',
     long_description = open(os.path.join(ROOT, 'README.rst')).read(),
     author = 'Gregory Petukhov',
