@@ -4,7 +4,7 @@ from grab import Grab
 try:
     from StringIO import StringIO as BytesIO
 except ImportError:
-    from io improt BytesIO
+    from io import BytesIO
 try:
     from urlparse import urljoin
 except ImportError:
@@ -13,6 +13,7 @@ try:
     from urllib import addinfourl
 except ImportError:
     from urllib.response import addinfourl
+import six
 
 from captcha_solver.error import *
 from captcha_solver import CaptchaSolver
@@ -28,7 +29,10 @@ class AntigateBackendUrllibTransportTestCase(TestCase):
 
     def setUp(self):
         self.setup_solver()
-        self.patcher = patch('urllib2.urlopen')
+        if six.PY2:
+            self.patcher = patch('urllib2.urlopen')
+        else:
+            self.patcher = patch('urllib.request.urlopen')
         self.mock_urlopen = self.patcher.start()
 
     def tearDown(self):

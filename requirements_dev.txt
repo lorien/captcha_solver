@@ -4,3 +4,5 @@ coveralls
 flake8
 mock
 grab
+six
+pycurl
