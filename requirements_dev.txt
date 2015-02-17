@@ -6,3 +6,4 @@ mock
 grab
 six
 pycurl
+bumpversion
