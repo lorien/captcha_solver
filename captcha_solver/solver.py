@@ -48,7 +48,7 @@ class CaptchaSolver(object):
     def solve_captcha(self, data, recognition_time=120, delay=5, **kwargs):
         captcha_id = self.submit_captcha(image_data=data)
 
-        for _ in xrange(0, recognition_time/delay, delay):
+        for _ in range(0, int(recognition_time / delay), delay):
             try:
                 return self.check_solution(captcha_id)
             except SolutionNotReady:

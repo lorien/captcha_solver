@@ -4,7 +4,10 @@ try:
     from urllib import urlencode
 except ImportError:
     from urllib.parse import urlencode
-from urlparse import urljoin
+try:
+    from urlparse import urljoin
+except ImportError:
+    from urllib.parse import urljoin
 
 
 from captcha_solver.captcha_backend.base import CaptchaBackend
@@ -28,12 +31,15 @@ class AntigateBackend(CaptchaBackend):
         return {'url': url, 'post_data': post}
 
     def parse_submit_captcha_response(self, res):
+        """
+        Returns: string
+        """
         if res['code'] == 200:
-            if res['body'].startswith('OK|'):
-                return res['body'].split('|', 1)[1]
-            elif res['body'] == 'ERROR_NO_SLOT_AVAILABLE':
+            if res['body'].startswith(b'OK|'):
+                return res['body'].split(b'|', 1)[1].decode('ascii')
+            elif res['body'] == b'ERROR_NO_SLOT_AVAILABLE':
                 raise ServiceTooBusy('Service too busy')
-            elif res['body'] == 'ERROR_ZERO_BALANCE':
+            elif res['body'] == b'ERROR_ZERO_BALANCE':
                 raise BalanceTooLow('Balance too low')
             else:
                 raise CaptchaServiceError(res['body'])
@@ -46,10 +52,13 @@ class AntigateBackend(CaptchaBackend):
         return {'url': url, 'post_data': None}
 
     def parse_check_solution_response(self, res):
+        """
+        Returns: string
+        """
         if res['code'] == 200:
-            if res['body'].startswith('OK|'):
-                return res['body'].split('|', 1)[1]
-            elif res['body'] == 'CAPCHA_NOT_READY':
+            if res['body'].startswith(b'OK|'):
+                return res['body'].split(b'|', 1)[1].decode('ascii')
+            elif res['body'] == b'CAPCHA_NOT_READY':
                 raise SolutionNotReady('Solution not ready')
             else:
                 raise CaptchaServiceError(res['body'])

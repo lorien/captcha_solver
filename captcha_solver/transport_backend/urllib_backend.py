@@ -2,15 +2,18 @@ try:
     from urllib import urlencode
 except ImportError:
     from urllib.parse import urlencode
-import urllib2
+try:
+    from urllib2 import urlopen, Request
+except ImportError:
+    from urllib.request import urlopen, Request
 
 
 class UrllibBackend(object):
     def request(self, url, data):
         if data:
-            request = urllib2.Request(url, urlencode(data))
+            request = Request(url, urlencode(data))
         else:
-            request = urllib2.Request(url, None)
-        response = urllib2.urlopen(request)
+            request = Request(url, None)
+        response = urlopen(request)
         body = response.read()
         return {'code': response.getcode(), 'body': body}

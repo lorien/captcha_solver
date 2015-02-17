@@ -1,9 +1,18 @@
 from unittest import TestCase
 from mock import patch
 from grab import Grab
-from urlparse import urljoin
-from urllib import addinfourl
-from StringIO import StringIO
+try:
+    from StringIO import StringIO as BytesIO
+except ImportError:
+    from io improt BytesIO
+try:
+    from urlparse import urljoin
+except ImportError:
+    from urllib.parse import urljoin
+try:
+    from urllib import addinfourl
+except ImportError:
+    from urllib.response import addinfourl
 
 from captcha_solver.error import *
 from captcha_solver import CaptchaSolver
@@ -31,38 +40,38 @@ class AntigateBackendUrllibTransportTestCase(TestCase):
             submit_url = urljoin(self.service_url, 'in.php')
             check_url = urljoin(self.service_url, 'res.php')
             if url == submit_url:
-                return addinfourl(StringIO('OK|captcha_id'), {}, url, 200)
+                return addinfourl(BytesIO(b'OK|captcha_id'), {}, url, 200)
             elif url.startswith(check_url):
-                return addinfourl(StringIO('OK|decoded_captcha'), {}, url, 200)
+                return addinfourl(BytesIO(b'OK|decoded_captcha'), {}, url, 200)
             else:
                 raise Exception('Invalid test')
 
         self.mock_urlopen.side_effect = urlopen
-        self.assertEqual(self.solver.solve_captcha('image_data'), 'decoded_captcha')
+        self.assertEqual(self.solver.solve_captcha(b'image_data'), 'decoded_captcha')
 
     def test_antigate_no_slot_available(self):
         def urlopen(url, data=None, timeout=None):
             url = url.get_full_url()
             submit_url = urljoin(self.service_url, 'in.php')
             if url == submit_url:
-                return addinfourl(StringIO('ERROR_NO_SLOT_AVAILABLE'), {}, url, 200)
+                return addinfourl(BytesIO('ERROR_NO_SLOT_AVAILABLE'), {}, url, 200)
             else:
                 raise Exception('Invalid test')
 
         self.mock_urlopen.side_effect = urlopen
-        self.assertRaises(ServiceTooBusy, self.solver.solve_captcha, 'image_data')
+        self.assertRaises(ServiceTooBusy, self.solver.solve_captcha, b'image_data')
 
     def test_antigate_zero_balance(self):
         def urlopen(url, data=None, timeout=None):
             url = url.get_full_url()
             submit_url = urljoin(self.service_url, 'in.php')
             if url == submit_url:
-                return addinfourl(StringIO('ERROR_ZERO_BALANCE'), {}, url, 200)
+                return addinfourl(BytesIO('ERROR_ZERO_BALANCE'), {}, url, 200)
             else:
                 raise Exception('Invalid test')
 
         self.mock_urlopen.side_effect = urlopen
-        self.assertRaises(BalanceTooLow, self.solver.solve_captcha, 'image_data')
+        self.assertRaises(BalanceTooLow, self.solver.solve_captcha, b'image_data')
 
     def test_solution_timeout_error(self):
         def urlopen(url, data=None, timeout=None):
@@ -70,15 +79,15 @@ class AntigateBackendUrllibTransportTestCase(TestCase):
             submit_url = urljoin(self.service_url, 'in.php')
             check_url = urljoin(self.service_url, 'res.php')
             if url == submit_url:
-                return addinfourl(StringIO('OK|captcha_id'), {}, url, 200)
+                return addinfourl(BytesIO('OK|captcha_id'), {}, url, 200)
             elif url.startswith(check_url):
-                return addinfourl(StringIO('CAPCHA_NOT_READY'), {}, url, 200)
+                return addinfourl(BytesIO('CAPCHA_NOT_READY'), {}, url, 200)
             else:
                 raise Exception('Invalid test')
 
         self.mock_urlopen.side_effect = urlopen
         self.assertRaises(SolutionTimeoutError, self.solver.solve_captcha,
-                          'image_data', recognition_time=1, delay=1)
+                          b'image_data', recognition_time=1, delay=1)
 
 
 class AntigateBackendGrabTransportTestCase(TestCase):
