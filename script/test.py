@@ -8,6 +8,7 @@ import os
 
 TEST_LIST = (
     'test.solver',
+    'test.contrib'
 )
 
 

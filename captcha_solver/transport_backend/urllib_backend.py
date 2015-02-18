@@ -11,7 +11,7 @@ except ImportError:
 class UrllibBackend(object):
     def request(self, url, data):
         if data:
-            request = Request(url, urlencode(data))
+            request = Request(url, urlencode(data).encode('utf8'))
         else:
             request = Request(url, None)
         response = urlopen(request)

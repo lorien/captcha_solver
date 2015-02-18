@@ -1,13 +1,7 @@
 import tempfile
-import webbrowser
-import time
 import os
 import pygtk
 import gtk
-try:
-    from StringIO import StringIO
-except ImportError:
-    from io import StringIO
 
 
 from captcha_solver.captcha_backend.base import CaptchaBackend

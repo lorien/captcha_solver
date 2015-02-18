@@ -1,4 +1,3 @@
-from tempfile import mkstemp
 from base64 import b64encode
 try:
     from urllib import urlencode
@@ -12,7 +11,7 @@ except ImportError:
 
 from captcha_solver.captcha_backend.base import CaptchaBackend
 from captcha_solver import (CaptchaServiceError, ServiceTooBusy,
-                                BalanceTooLow, SolutionNotReady)
+                            BalanceTooLow, SolutionNotReady)
 
 
 class AntigateBackend(CaptchaBackend):
@@ -45,7 +44,7 @@ class AntigateBackend(CaptchaBackend):
                 raise CaptchaServiceError(res['body'])
         else:
             raise CaptchaServiceError('Returned HTTP code: %d' % res['code'])
-        
+
     def get_check_solution_request_data(self, captcha_id):
         params = {'key': self.api_key, 'action': 'get', 'id': captcha_id}
         url = urljoin(self.service_url, 'res.php?%s' % urlencode(params))

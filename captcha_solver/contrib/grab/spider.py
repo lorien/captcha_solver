@@ -1,7 +1,7 @@
 import logging
 
 from grab.spider.task import Task
-from captcha_solver.error import SolutionNotReady, CaptchaServiceError
+from captcha_solver.error import SolutionNotReady
 
 logger = logging.getLogger('grab.spider.captcha')
 
@@ -16,7 +16,8 @@ class CaptchaSolverInterface(object):
     Spider mixin for recognizing captcha that can be used in this way:
     class Bot(Spider, CaptchaSolverInterface):
         def prepare(self):
-            self.solver = CaptchaSolver('antigate', 'grab', api_key='some api key')
+            self.solver = CaptchaSolver('antigate', 'grab',
+                                        api_key='some api key')
 
         def task_generator(self):
             grab = self.create_grab_instance()
@@ -38,19 +39,23 @@ class CaptchaSolverInterface(object):
     """
     def task_download_captcha(self, grab, task):
         logger.debug('Got captcha image')
-        data = self.solver.captcha_backend.get_submit_captcha_request_data(grab.response.body)
+        data = self.solver.captcha_backend.\
+            get_submit_captcha_request_data(grab.response.body)
         g_new = self.solver.network_backend.make_grab_instance(**data)
         yield Task('submit_captcha', grab=g_new, meta=task.meta)
 
     def task_submit_captcha(self, grab, task):
-        captcha_id = self.solver.captcha_backend.parse_submit_captcha_response(response_to_dict(grab))
-        data = self.solver.captcha_backend.get_check_solution_request_data(captcha_id)
+        captcha_id = self.solver.captcha_backend\
+            .parse_submit_captcha_response(response_to_dict(grab))
+        data = self.solver.captcha_backend\
+            .get_check_solution_request_data(captcha_id)
         g_new = self.solver.network_backend.make_grab_instance(**data)
         yield Task('check_solution', grab=g_new, delay=5, meta=task.meta)
 
     def task_check_solution(self, grab, task):
         try:
-            solution = self.solver.captcha_backend.parse_check_solution_response(response_to_dict(grab))
+            solution = self.solver.captcha_backend\
+                .parse_check_solution_response(response_to_dict(grab))
         except SolutionNotReady:
             logger.debug('Solution is not ready')
             yield task.clone(delay=task.original_delay)
@@ -59,7 +64,8 @@ class CaptchaSolverInterface(object):
             yield task.meta['handler'](solution, task.meta)
 
 
-def solve_captcha(solver, grab, url=None, delay=5, recognition_time=120, **kwargs):
+def solve_captcha(solver, grab, url=None, delay=5,
+                  recognition_time=120, **kwargs):
     """
     :param solver: CaptchaService object
     :param grab: grab object with captcha image in body
@@ -82,8 +88,10 @@ def solve_captcha(solver, grab, url=None, delay=5, recognition_time=120, **kwarg
             captcha_grab.setup(url=url)
             captcha_grab = yield Task(grab=captcha_grab)
             solution_grab = yield solve_captcha(solver, captcha_grab)
-            solution = solver.captcha_backend.parse_check_solution_response({'code': solution_grab.response.code,
-                                                                            'body': solution_grab.response.body})
+            request_data = {'code': solution_grab.response.code,
+                            'body': solution_grab.response.body}
+            solution = solver.captcha_backend\
+                .parse_check_solution_response(request_data)
     b = Bot()
     b.run()
     """
@@ -92,18 +100,21 @@ def solve_captcha(solver, grab, url=None, delay=5, recognition_time=120, **kwarg
         grab.setup(url=url)
         grab = yield Task(grab=grab)
     logger.debug('Got captcha image')
-    data = solver.captcha_backend.get_submit_captcha_request_data(grab.response.body, **kwargs)
+    data = solver.captcha_backend\
+        .get_submit_captcha_request_data(grab.response.body, **kwargs)
     antigate_grab = solver.network_backend.make_grab_instance(**data)
     antigate_grab = yield Task(grab=antigate_grab)
 
-    captcha_id = solver.captcha_backend.parse_submit_captcha_response(response_to_dict(antigate_grab))
+    captcha_id = solver.captcha_backend\
+        .parse_submit_captcha_response(response_to_dict(antigate_grab))
     data = solver.captcha_backend.get_check_solution_request_data(captcha_id)
     antigate_grab = solver.network_backend.make_grab_instance(**data)
 
     for _ in xrange(0, recognition_time/delay, delay):
         antigate_grab = yield Task(grab=antigate_grab, delay=delay)
         try:
-            solver.captcha_backend.parse_check_solution_response(response_to_dict(antigate_grab))
+            solver.captcha_backend\
+                .parse_check_solution_response(response_to_dict(antigate_grab))
         except SolutionNotReady:
             logger.debug('Solution is not ready')
         else:
