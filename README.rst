@@ -14,8 +14,8 @@ Captcha Solver
 .. image:: https://pypip.in/version/captcha-solver/badge.svg
     :target: https://pypi.python.org/pypi/captcha-solver
 
-.. image:: https://landscape.io/github/lorien/captcha-solver/master/landscape.png
-   :target: https://landscape.io/github/lorien/captcha-solver/master
+.. image:: https://landscape.io/github/lorien/captcha_solver/master/landscape.png
+   :target: https://landscape.io/github/lorien/captcha_solver/master
 
 Univeral API to different captcha solving services.
 

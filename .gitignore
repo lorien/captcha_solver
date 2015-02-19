@@ -13,3 +13,4 @@
 /var/
 /.tox/
 /.coverage
+/dist/

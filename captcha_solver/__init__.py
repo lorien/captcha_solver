@@ -1,5 +1,4 @@
 from captcha_solver.solver import CaptchaSolver  # noqa
 from captcha_solver.error import *  # noqa
 
-version_info = (0, 0, 1)
-__version__ = '.'.join(map(str, version_info))
+__version__ = '0.0.1'
