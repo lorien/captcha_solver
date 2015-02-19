@@ -1,12 +1,12 @@
+from grab import Grab
+
 from captcha_solver.error import *  # noqa
 from captcha_solver import CaptchaSolver
 from captcha_solver.contrib.grab.captcha import solve_captcha
-from grab import Grab
-
-from .solver import ServerTestCase, NO_DELAY
+from .base import NO_DELAY, BaseSolverTestCase
 
 
-class GrabContribTestCase(ServerTestCase):
+class GrabContribTestCase(BaseSolverTestCase):
     def setup_solver(self):
         self.solver = CaptchaSolver('antigate',
                                     network_backend='urllib',
@@ -14,8 +14,11 @@ class GrabContribTestCase(ServerTestCase):
                                     api_key='does not matter')
 
     def test_antigate_decoded_from_grab(self):
-        self.server.response_once['post.data'] = b'OK|captcha_id'
-        self.server.response_once['get.data'] = b'OK|decoded_captcha'
+        def handler():
+            yield b'OK|captcha_id'
+            yield b'OK|decoded_captcha'
+
+        self.server.response['data'] = handler()
         g = Grab(b'image_data')
         self.assertEqual(solve_captcha(self.solver, g, **NO_DELAY),
                          'decoded_captcha')
