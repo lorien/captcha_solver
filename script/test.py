@@ -2,8 +2,6 @@
 # coding: utf-8
 import unittest
 import sys
-from copy import copy
-import os
 
 
 TEST_LIST = (
