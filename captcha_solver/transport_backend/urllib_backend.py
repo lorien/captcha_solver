@@ -7,6 +7,11 @@ try:
 except ImportError:
     from urllib.request import urlopen, Request
 
+try:
+    from urllib2 import HTTPError
+except ImportError:
+    from urllib.error import HTTPError
+
 
 class UrllibBackend(object):
     def request(self, url, data):
@@ -14,6 +19,11 @@ class UrllibBackend(object):
             request = Request(url, urlencode(data).encode('utf8'))
         else:
             request = Request(url, None)
-        response = urlopen(request)
-        body = response.read()
-        return {'code': response.getcode(), 'body': body}
+        try:
+            response = urlopen(request)
+            body = response.read()
+            code = response.getcode()
+        except HTTPError as e:
+            code = e.code
+            body = e.fp.read()
+        return {'code': code, 'body': body}

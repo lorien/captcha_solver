@@ -29,6 +29,16 @@ class AntigateUrllibTestCase(BaseSolverTestCase):
         self.assertRaises(BalanceTooLow, self.solver.solve_captcha,
                           b'image_data')
 
+    def test_antigate_unknown_error(self):
+        self.server.response_once['data'] = b'UNKNOWN_ERROR'
+        self.assertRaises(CaptchaServiceError, self.solver.solve_captcha,
+                          b'image_data')
+
+    def test_antigate_unknown_code(self):
+        self.server.response_once['code'] = 404
+        self.assertRaises(CaptchaServiceError, self.solver.solve_captcha,
+                          b'image_data')
+
     def test_solution_timeout_error(self):
         def handler():
             yield b'OK|captcha_id'
@@ -36,6 +46,23 @@ class AntigateUrllibTestCase(BaseSolverTestCase):
 
         self.server.response['data'] = handler()
         self.assertRaises(SolutionTimeoutError, self.solver.solve_captcha,
+                          b'image_data', **NO_DELAY)
+
+    def test_solution_unknown_error(self):
+        def handler():
+            yield b'OK|captcha_id'
+            yield b'UNKNOWN_ERROR'
+
+        self.server.response['data'] = handler()
+        self.assertRaises(CaptchaServiceError, self.solver.solve_captcha,
+                          b'image_data', **NO_DELAY)
+
+    def test_solution_unknown_code(self):
+        def handler():
+            yield b'OK|captcha_id'
+
+        self.server.response['data'] = handler()
+        self.assertRaises(CaptchaServiceError, self.solver.solve_captcha,
                           b'image_data', **NO_DELAY)
 
 
