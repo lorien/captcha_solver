@@ -26,4 +26,4 @@ class UrllibBackend(object):
         except HTTPError as e:
             code = e.code
             body = e.fp.read()
-        return {'code': code, 'body': body}
+        return {'code': code, 'body': body, 'url': url}
