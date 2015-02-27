@@ -58,7 +58,7 @@ class AntigateBackend(CaptchaBackend):
             if res['body'].startswith(b'OK|'):
                 return res['body'].split(b'|', 1)[1].decode('ascii')
             elif res['body'] == b'CAPCHA_NOT_READY':
-                raise SolutionNotReady('Solution not ready')
+                raise SolutionNotReady('Solution is not ready')
             else:
                 raise CaptchaServiceError(res['body'])
         else:

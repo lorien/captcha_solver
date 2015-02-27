@@ -50,7 +50,8 @@ class CaptchaSolverInterface(object):
         data = self.solver.captcha_backend\
             .get_check_solution_request_data(captcha_id)
         g_new = self.solver.network_backend.make_grab_instance(**data)
-        yield Task('check_solution', grab=g_new, delay=5, meta=task.meta)
+        delay = task.meta.get('delay', 5)
+        yield Task('check_solution', grab=g_new, delay=delay, meta=task.meta)
 
     def task_check_solution(self, grab, task):
         try:
@@ -64,7 +65,7 @@ class CaptchaSolverInterface(object):
             yield task.meta['handler'](solution, task.meta)
 
 
-def solve_captcha(solver, grab, url=None, delay=5,
+def solve_captcha(solver, grab, url=None, recognition_delay=5,
                   recognition_time=120, **kwargs):
     """
     :param solver: CaptchaService object
@@ -110,8 +111,9 @@ def solve_captcha(solver, grab, url=None, delay=5,
     data = solver.captcha_backend.get_check_solution_request_data(captcha_id)
     antigate_grab = solver.network_backend.make_grab_instance(**data)
 
-    for _ in xrange(0, recognition_time/delay, delay):
-        antigate_grab = yield Task(grab=antigate_grab, delay=delay)
+    delay = recognition_delay or 1
+    for _ in range(0, recognition_time, delay):
+        antigate_grab = yield Task(grab=antigate_grab, delay=recognition_delay)
         try:
             solver.captcha_backend\
                 .parse_check_solution_response(response_to_dict(antigate_grab))
