@@ -1,12 +1,5 @@
 from base64 import b64encode
-try:
-    from urllib import urlencode
-except ImportError:
-    from urllib.parse import urlencode
-try:
-    from urlparse import urljoin
-except ImportError:
-    from urllib.parse import urljoin
+from six.moves.urllib.parse import urlencode, urljoin
 
 
 from captcha_solver.captcha_backend.base import CaptchaBackend

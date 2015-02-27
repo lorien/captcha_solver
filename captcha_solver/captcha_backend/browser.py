@@ -2,14 +2,8 @@ import tempfile
 import webbrowser
 import time
 import os
-
-
+from six.moves.builtins import input
 from captcha_solver.captcha_backend.base import CaptchaBackend
-
-try:
-    input = raw_input
-except NameError:
-    input = input
 
 
 class BrowserBackend(CaptchaBackend):

@@ -1,16 +1,6 @@
-try:
-    from urllib import urlencode
-except ImportError:
-    from urllib.parse import urlencode
-try:
-    from urllib2 import urlopen, Request
-except ImportError:
-    from urllib.request import urlopen, Request
-
-try:
-    from urllib2 import HTTPError
-except ImportError:
-    from urllib.error import HTTPError
+from six.moves.urllib.request import urlopen, Request
+from six.moves.urllib.error import HTTPError
+from six.moves.urllib.parse import urlencode
 
 
 class UrllibBackend(object):
