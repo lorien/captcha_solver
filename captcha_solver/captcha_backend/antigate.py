@@ -49,7 +49,7 @@ class AntigateBackend(CaptchaBackend):
         """
         if res['code'] == 200:
             if res['body'].startswith(b'OK|'):
-                return res['body'].split(b'|', 1)[1].decode('ascii')
+                return res['body'].split(b'|', 1)[1].decode('utf8')
             elif res['body'] == b'CAPCHA_NOT_READY':
                 raise SolutionNotReady('Solution is not ready')
             else:

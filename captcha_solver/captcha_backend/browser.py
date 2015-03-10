@@ -2,7 +2,7 @@ import tempfile
 import webbrowser
 import time
 import os
-from six.moves.builtins import input
+from six.moves import input
 from captcha_solver.captcha_backend.base import CaptchaBackend
 
 

@@ -55,7 +55,7 @@ class CaptchaSolver(object):
         delay = submiting_delay or 1
         for _ in range(0, submiting_time, delay):
             try:
-                captcha_id = self.submit_captcha(image_data=data)
+                captcha_id = self.submit_captcha(image_data=data, **kwargs)
                 break
             except ServiceTooBusy:
                 time.sleep(submiting_delay)
