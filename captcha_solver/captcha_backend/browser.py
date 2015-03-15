@@ -3,6 +3,8 @@ import webbrowser
 import time
 import os
 from six.moves import input
+import sys
+import locale
 from captcha_solver.captcha_backend.base import CaptchaBackend
 
 
@@ -27,6 +29,9 @@ class BrowserBackend(CaptchaBackend):
         # which browser could dump to console
         time.sleep(0.5)
         solution = input('Enter solution: ')
+        if hasattr(solution, 'decode'):
+            solution = solution.decode(sys.stdin.encoding or
+                                       locale.getpreferredencoding(True))
         path = res['url'].replace('file://', '')
         os.unlink(path)
         return solution

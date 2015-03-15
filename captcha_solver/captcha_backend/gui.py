@@ -4,7 +4,7 @@ import pygtk
 import gtk
 
 
-from captcha_solver.captcha_backend.base import CaptchaBackend
+from captcha_solver.captcha_backend.browser import BrowserBackend
 
 pygtk.require('2.0')
 
@@ -37,7 +37,10 @@ class CaptchaWindow(object):
         gtk.main_quit()
 
     def solve(self, *args):
-        self.solution.append(self.entry.get_text())
+        solution = self.entry.get_text()
+        if hasattr(solution, 'decode'):
+            solution = solution.decode('utf8')
+        self.solution.append(solution)
         self.window.hide()
         gtk.main_quit()
 
@@ -45,23 +48,9 @@ class CaptchaWindow(object):
         gtk.main()
 
 
-class GuiBackend(CaptchaBackend):
-    def get_submit_captcha_request_data(self, data):
-        fd, path = tempfile.mkstemp()
-        with open(path, 'w') as out:
-            out.write(data)
-        url = 'file://' + path
-        return {'url': url, 'post_data': None}
-
-    def parse_submit_captcha_response(self, res):
-        return res.url.replace('file://', '')
-
-    def get_check_solution_request_data(self, captcha_id):
-        url = 'file://' + captcha_id
-        return {'url': url, 'post_data': None}
-
+class GuiBackend(BrowserBackend):
     def parse_check_solution_response(self, res):
-        path = res.url.replace('file://', '')
+        path = res['url'].replace('file://', '')
         solution = []
         window = CaptchaWindow(path, solution)
         window.main()
