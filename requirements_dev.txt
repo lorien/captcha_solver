@@ -7,4 +7,4 @@ grab
 six
 pycurl
 bumpversion
-lxml
+test-server
