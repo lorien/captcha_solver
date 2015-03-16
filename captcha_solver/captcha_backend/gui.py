@@ -1,4 +1,3 @@
-import tempfile
 import os
 import pygtk
 import gtk
