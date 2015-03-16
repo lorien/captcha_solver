@@ -8,6 +8,7 @@ TEST_LIST = (
     'test.solver',
     'test.contrib',
     'test.browser',
+    'test.gui'
 )
 
 
