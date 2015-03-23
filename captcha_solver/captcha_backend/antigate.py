@@ -16,7 +16,7 @@ class AntigateBackend(CaptchaBackend):
         post = {
             'key': self.api_key,
             'method': 'base64',
-            'body': b64encode(data),
+            'body': b64encode(data).decode('ascii'),
         }
         post.update(kwargs)
         url = urljoin(self.service_url, 'in.php')

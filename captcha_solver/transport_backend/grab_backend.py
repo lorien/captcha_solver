@@ -3,7 +3,7 @@ from grab import Grab
 
 class GrabBackend(object):
     def request(self, url, post_data):
-        g = Grab()
+        g = Grab(connect_timeout=10)
         g.setup(url=url)
         if post_data:
             g.setup(post=post_data)

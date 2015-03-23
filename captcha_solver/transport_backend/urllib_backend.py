@@ -6,7 +6,7 @@ from six.moves.urllib.parse import urlencode
 class UrllibBackend(object):
     def request(self, url, data):
         if data:
-            request = Request(url, urlencode(data).encode('utf8'))
+            request = Request(url, urlencode(data).encode('ascii'))
         else:
             request = Request(url, None)
         try:

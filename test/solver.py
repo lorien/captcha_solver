@@ -1,6 +1,7 @@
 from captcha_solver.error import *  # noqa
 from captcha_solver import CaptchaSolver
 from .base import BaseSolverTestCase, NO_DELAY
+from six import string_types
 
 
 class AntigateUrllibTestCase(BaseSolverTestCase):
@@ -9,6 +10,13 @@ class AntigateUrllibTestCase(BaseSolverTestCase):
                                     network_backend='urllib',
                                     service_url=self.server.get_url(),
                                     api_key='does not matter')
+
+    def test_post_data(self):
+        data = b'foo'
+        res = self.solver.captcha_backend.get_submit_captcha_request_data(data)
+        body = res['post_data']['body']
+
+        self.assertTrue(isinstance(body, string_types))
 
     def test_antigate_decoded(self):
         def handler():
