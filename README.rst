@@ -26,8 +26,11 @@ Usage Example
 .. code:: python
 
     from captcha_solver import CaptchaSolver
+
     solver = CaptchaSolver('browser')
-    print(solver.solve_captcha(image))
+    with open('captcha.png', 'rb') as inp:
+        raw_data = inp.read()
+    print(solver.solve_captcha(raw_data))
 
 
 Installation
