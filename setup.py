@@ -5,7 +5,7 @@ ROOT = os.path.dirname(os.path.realpath(__file__))
 
 setup(
     name = 'captcha-solver',
-    version = '0.0.2',
+    version = '0.0.3',
     description = 'Universal API to different captcha solving services',
     long_description = open(os.path.join(ROOT, 'README.rst')).read(),
     author = 'Gregory Petukhov',
