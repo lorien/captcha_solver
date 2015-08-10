@@ -14,3 +14,4 @@
 /.tox/
 /.coverage
 /dist/
+/build/

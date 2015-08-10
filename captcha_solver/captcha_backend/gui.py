@@ -6,6 +6,7 @@ class CaptchaWindow(object):
     def __init__(self, path, solution):
         import pygtk
         import gtk
+
         pygtk.require('2.0')
         self.solution = solution
         self.window = gtk.Window(gtk.WINDOW_TOPLEVEL)
@@ -30,18 +31,24 @@ class CaptchaWindow(object):
         self.entry.grab_focus()
 
     def destroy(self, *args):
-        gtk.main_quit()  # noqa
+        import gtk
+
+        gtk.main_quit()
 
     def solve(self, *args):
+        import gtk
+
         solution = self.entry.get_text()
         if hasattr(solution, 'decode'):
             solution = solution.decode('utf8')
         self.solution.append(solution)
         self.window.hide()
-        gtk.main_quit()  # noqa
+        gtk.main_quit()
 
     def main(self):
-        gtk.main()  # noqa
+        import gtk
+
+        gtk.main()
 
 
 class GuiBackend(BrowserBackend):
