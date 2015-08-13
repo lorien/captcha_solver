@@ -20,8 +20,8 @@ Captcha Solver
 Univeral API to different captcha solving services.
 
 
-Usage Example
-=============
+Browser Backend Example
+=======================
 
 .. code:: python
 
@@ -31,6 +31,36 @@ Usage Example
     with open('captcha.png', 'rb') as inp:
         raw_data = inp.read()
     print(solver.solve_captcha(raw_data))
+
+
+Antigate Backend Example
+========================
+
+.. code:: python
+
+    from captcha_solver import CaptchaSolver
+
+    your_antigate_key = '7244c9f21b3617b958d2c0e2a8a67e93'
+    solver = CaptchaSolver('antigate', api_key=your_antigate_key)
+    with open('captcha.png', 'rb') as inp:
+        raw_data = inp.read()
+    print(solver.solve_captcha(raw_data))
+
+
+Grab Example
+============
+
+.. code:: python
+
+    from captcha_solver import CaptchaSolver
+    from captcha_solver.contrib.grab.captcha import solve_captcha
+    from grab import Grab
+
+
+    g = Grab()
+    solver = CaptchaSolver('browser')
+    url = 'http://captcha.ru/captcha2/'
+    print (solve_captcha(solver, g, url=url))
 
 
 Installation
