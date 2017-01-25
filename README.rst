@@ -35,8 +35,7 @@ Browser Backend Example
     from captcha_solver import CaptchaSolver
 
     solver = CaptchaSolver('browser')
-    with open('captcha.png', 'rb') as inp:
-        raw_data = inp.read()
+    raw_data = open('captcha.png', 'rb').read()
     print(solver.solve_captcha(raw_data))
 
 
@@ -47,8 +46,18 @@ Antigate Backend Example
 
     from captcha_solver import CaptchaSolver
 
-    your_antigate_key = '7244c9f21b3617b958d2c0e2a8a67e93'
-    solver = CaptchaSolver('antigate', api_key=your_antigate_key)
-    with open('captcha.png', 'rb') as inp:
-        raw_data = inp.read()
+    solver = CaptchaSolver('antigate', api_key='ANTIGATE_KEY')
+    raw_data = open('captcha.png', 'rb').read()
+    print(solver.solve_captcha(raw_data))
+
+
+Rucaptcha Backend Example
+========================
+
+.. code:: python
+
+    from captcha_solver import CaptchaSolver
+
+    solver = CaptchaSolver('rucaptcha', api_key='RUCAPTCHA_KEY')
+    raw_data = open('captcha.png', 'rb').read()
     print(solver.solve_captcha(raw_data))

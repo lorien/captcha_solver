@@ -6,6 +6,7 @@ from .error import (SolutionNotReady, SolutionTimeoutError,
                     ServiceTooBusy, InvalidServiceBackend)
 from .network import request
 from .backend.antigate import AntigateBackend
+from .backend.rucaptcha import RucaptchaBackend
 from .backend.browser import BrowserBackend
 from .backend.gui import GuiBackend
 from .backend.base import ServiceBackend
@@ -13,6 +14,7 @@ from .backend.base import ServiceBackend
 logger = logging.getLogger('captcha_solver')
 BACKEND_ALIAS = {
     'antigate': AntigateBackend,
+    'rucaptcha': RucaptchaBackend,
     'browser': BrowserBackend,
     'gui': GuiBackend,
 }

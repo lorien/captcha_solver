@@ -16,3 +16,5 @@
 /dist/
 /build/
 /.cache/
+/captcha.jpg
+/test.py
