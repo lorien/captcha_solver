@@ -9,13 +9,6 @@ Captcha Solver
     :target: https://coveralls.io/r/lorien/captcha_solver?branch=master
 
 
-.. image:: https://img.shields.io/pypi/v/captcha-solver.svg
-    :target: https://pypi.python.org/pypi/captcha-solver
-
-.. image:: https://img.shields.io/pypi/l/captcha-solver.svg
-    :target: https://pypi.python.org/pypi/captcha-solver
-
-
 Univeral API to captcha solving services.
 
 
