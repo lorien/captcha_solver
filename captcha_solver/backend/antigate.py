@@ -1,13 +1,12 @@
 from base64 import b64encode
 from six.moves.urllib.parse import urlencode, urljoin
 
+from .base import ServiceBackend
+from ..error import (CaptchaServiceError, ServiceTooBusy,
+                     BalanceTooLow, SolutionNotReady)
 
-from captcha_solver.captcha_backend.base import CaptchaBackend
-from captcha_solver import (CaptchaServiceError, ServiceTooBusy,
-                            BalanceTooLow, SolutionNotReady)
 
-
-class AntigateBackend(CaptchaBackend):
+class AntigateBackend(ServiceBackend):
     def setup(self, api_key, service_url='http://antigate.com', **kwargs):
         self.api_key = api_key
         self.service_url = service_url

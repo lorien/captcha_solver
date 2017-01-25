@@ -9,8 +9,8 @@ class BrowserTestCase(TestCase):
         self.solver = CaptchaSolver('browser')
         self.wb_patcher = patch('webbrowser.open')
         self.mock_wb_open = self.wb_patcher.start()
-        self.raw_input_patcher = patch('captcha_solver.captcha_backend'
-                                       '.browser.input')
+        self.raw_input_patcher = patch(
+            'captcha_solver.backend.browser.input')
         self.mock_raw_input = self.raw_input_patcher.start()
 
     def tearDown(self):

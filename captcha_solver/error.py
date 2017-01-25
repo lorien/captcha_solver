@@ -1,12 +1,13 @@
-__all__ = ('CaptchaError', 'CaptchaServiceError', 'SolutionNotReady',
-           'ServiceTooBusy', 'BalanceTooLow', 'SolutionTimeoutError')
+__all__ = ('CaptchaSolverError', 'CaptchaServiceError', 'SolutionNotReady',
+           'ServiceTooBusy', 'BalanceTooLow', 'SolutionTimeoutError',
+           'InvalidServiceBackend')
 
 
-class CaptchaError(Exception):
+class CaptchaSolverError(Exception):
     pass
 
 
-class CaptchaServiceError(CaptchaError):
+class CaptchaServiceError(CaptchaSolverError):
     pass
 
 
@@ -23,4 +24,8 @@ class ServiceTooBusy(CaptchaServiceError):
 
 
 class BalanceTooLow(CaptchaServiceError):
+    pass
+
+
+class InvalidServiceBackend(CaptchaSolverError):
     pass

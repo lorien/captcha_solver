@@ -1,15 +1,14 @@
+.PHONY: flake flake_verbose coverage clean upload
+
 flake:
-	flake8 captcha_solver test script
+	flake8 captcha_solver test
 
 flake_verbose:
-	flake8 captcha_solver test script --show-pep8
-
-test:
-	run test
+	flake8 captcha_solver test --show-pep8
 
 coverage:
 	coverage erase
-	coverage run --source=captcha_solver -m runscript.cli test
+	coverage pytest
 	coverage report -m
 
 clean:
@@ -18,5 +17,3 @@ clean:
 
 upload:
 	python setup.py sdist upload
-
-.PHONY: all build venv flake test vtest testloop cov clean doc

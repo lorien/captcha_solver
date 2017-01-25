@@ -5,10 +5,11 @@ import os
 from six.moves import input
 import sys
 import locale
-from captcha_solver.captcha_backend.base import CaptchaBackend
+
+from .base import ServiceBackend
 
 
-class BrowserBackend(CaptchaBackend):
+class BrowserBackend(ServiceBackend):
     def get_submit_captcha_request_data(self, data):
         fd, path = tempfile.mkstemp()
         with open(path, 'wb') as out:

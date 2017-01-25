@@ -7,8 +7,8 @@ class GuiTestCase(TestCase):
 
     def setUp(self):
         self.solver = CaptchaSolver('gui')
-        self.cw_patcher = patch('captcha_solver.captcha_backend'
-                                '.gui.CaptchaWindow')
+        self.cw_patcher = patch(
+            'captcha_solver.backend.gui.CaptchaWindow')
         self.mock_cw = self.cw_patcher.start()
 
     def tearDown(self):

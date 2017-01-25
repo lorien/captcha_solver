@@ -1,19 +1,25 @@
-# coding:utf8
 import logging
-import importlib
 import time
+import six
 
-from captcha_solver.const import SOLVER_BACKEND_ALIAS, TRANSPORT_BACKEND_ALIAS
-from captcha_solver.error import SolutionNotReady, SolutionTimeoutError, \
-    ServiceTooBusy
-
+from .error import (SolutionNotReady, SolutionTimeoutError,
+                    ServiceTooBusy, InvalidServiceBackend)
+from .network import request
+from .backend.antigate import AntigateBackend
+from .backend.browser import BrowserBackend
+from .backend.gui import GuiBackend
+from .backend.base import ServiceBackend
 
 logger = logging.getLogger('captcha_solver')
+BACKEND_ALIAS = {
+    'antigate': AntigateBackend,
+    'browser': BrowserBackend,
+    'gui': GuiBackend,
+}
 
 
-def import_string(path):
-    module_path, cls_name = path.rsplit('.', 1)
-    return getattr(importlib.import_module(module_path), cls_name)
+class InvalidBackend(Exception):
+    pass
 
 
 class CaptchaSolver(object):
@@ -22,21 +28,28 @@ class CaptchaSolver(object):
     remote captcha solving service.
     """
 
-    def __init__(self, captcha_backend, network_backend='urllib', **kwargs):
-        captcha_backend_path = SOLVER_BACKEND_ALIAS.get(captcha_backend,
-                                                        captcha_backend)
-        network_backend_path = TRANSPORT_BACKEND_ALIAS.get(network_backend,
-                                                           network_backend)
-        self.captcha_backend = import_string(captcha_backend_path)()
-        self.network_backend = import_string(network_backend_path)()
-        self.captcha_backend.setup(**kwargs)
+    def __init__(self, backend, **kwargs):
+        """
+        :param backend: alias name of one of standard backends or
+            class inherited from SolverBackend
+        """
+        self.backend = self._initialize_backend(backend)
+        self.backend.setup(**kwargs)
+
+    def _initialize_backend(self, backend):
+        if isinstance(backend, ServiceBackend):
+            return backend()
+        elif isinstance(backend, six.string_types):
+            return BACKEND_ALIAS[backend]()
+        else:
+            raise InvalidServiceBackend('Invalid backend: %s' % backend)
 
     def submit_captcha(self, image_data, **kwargs):
         logger.debug('Submiting captcha')
-        data = self.captcha_backend.get_submit_captcha_request_data(image_data,
-                                                                    **kwargs)
-        response = self.network_backend.request(data['url'], data['post_data'])
-        return self.captcha_backend.parse_submit_captcha_response(response)
+        data = self.backend.get_submit_captcha_request_data(image_data,
+                                                            **kwargs)
+        response = request(data['url'], data['post_data'])
+        return self.backend.parse_submit_captcha_response(response)
 
     def check_solution(self, captcha_id):
         """
@@ -45,9 +58,9 @@ class CaptchaSolver(object):
         * ServiceTooBusy
         """
 
-        data = self.captcha_backend.get_check_solution_request_data(captcha_id)
-        response = self.network_backend.request(data['url'], data['post_data'])
-        return self.captcha_backend.parse_check_solution_response(response)
+        data = self.backend.get_check_solution_request_data(captcha_id)
+        response = request(data['url'], data['post_data'])
+        return self.backend.parse_check_solution_response(response)
 
     def solve_captcha(self, data, submiting_time=30, submiting_delay=3,
                       recognition_time=120, recognition_delay=5, **kwargs):

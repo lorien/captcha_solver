@@ -1,10 +1,7 @@
-runscript
 coverage
 coveralls
 flake8
 mock
-grab
-six
-pycurl
 bumpversion
 test-server
+pytest

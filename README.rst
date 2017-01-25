@@ -8,16 +8,10 @@ Captcha Solver
 .. image:: https://coveralls.io/repos/lorien/captcha_solver/badge.svg?branch=master
     :target: https://coveralls.io/r/lorien/captcha_solver?branch=master
 
-.. image:: https://pypip.in/download/captcha-solver/badge.svg?period=month
-    :target: https://pypi.python.org/pypi/captcha-solver
-
 .. image:: https://pypip.in/version/captcha-solver/badge.svg
     :target: https://pypi.python.org/pypi/captcha-solver
 
-.. image:: https://landscape.io/github/lorien/captcha_solver/master/landscape.png
-   :target: https://landscape.io/github/lorien/captcha_solver/master
-
-Univeral API to different captcha solving services.
+Univeral API to captcha solving services.
 
 
 Browser Backend Example
@@ -47,25 +41,9 @@ Antigate Backend Example
     print(solver.solve_captcha(raw_data))
 
 
-Grab Example
-============
-
-.. code:: python
-
-    from captcha_solver import CaptchaSolver
-    from captcha_solver.contrib.grab.captcha import solve_captcha
-    from grab import Grab
-
-
-    g = Grab()
-    solver = CaptchaSolver('browser')
-    url = 'http://captcha.ru/captcha2/'
-    print (solve_captcha(solver, g, url=url))
-
-
 Installation
 ============
 
 .. code:: bash
 
-    pip install captcha_solver
+    pip install captcha-solver

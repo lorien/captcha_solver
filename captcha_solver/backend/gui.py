@@ -1,5 +1,6 @@
 import os
-from captcha_solver.captcha_backend.browser import BrowserBackend
+
+from .browser import BrowserBackend
 
 
 class CaptchaWindow(object):
