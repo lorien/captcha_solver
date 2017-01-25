@@ -19,6 +19,14 @@ Captcha Solver
 Univeral API to captcha solving services.
 
 
+Installation
+============
+
+.. code:: bash
+
+    pip install captcha-solver
+
+
 Browser Backend Example
 =======================
 
@@ -44,11 +52,3 @@ Antigate Backend Example
     with open('captcha.png', 'rb') as inp:
         raw_data = inp.read()
     print(solver.solve_captcha(raw_data))
-
-
-Installation
-============
-
-.. code:: bash
-
-    pip install captcha-solver
