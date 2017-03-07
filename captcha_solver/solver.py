@@ -1,6 +1,9 @@
 import logging
 import time
+import socket
+
 import six
+from six.moves.urllib.error import URLError
 
 from .error import (SolutionNotReady, SolutionTimeoutError,
                     ServiceTooBusy, InvalidServiceBackend)
@@ -18,6 +21,7 @@ BACKEND_ALIAS = {
     'browser': BrowserBackend,
     'gui': GuiBackend,
 }
+DEFAULT_NETWORK_TIMEOUT = 5
 
 
 class InvalidBackend(Exception):
@@ -37,6 +41,11 @@ class CaptchaSolver(object):
         """
         self.backend = self._initialize_backend(backend)
         self.backend.setup(**kwargs)
+        self.network_config = {}
+        self.setup_network_config()
+
+    def setup_network_config(self, timeout=DEFAULT_NETWORK_TIMEOUT):
+        self.network_config['timeout'] = timeout
 
     def _initialize_backend(self, backend):
         if isinstance(backend, ServiceBackend):
@@ -50,7 +59,8 @@ class CaptchaSolver(object):
         logger.debug('Submiting captcha')
         data = self.backend.get_submit_captcha_request_data(image_data,
                                                             **kwargs)
-        response = request(data['url'], data['post_data'])
+        response = request(data['url'], data['post_data'],
+                           timeout=self.network_config['timeout'])
         return self.backend.parse_submit_captcha_response(response)
 
     def check_solution(self, captcha_id):
@@ -61,28 +71,48 @@ class CaptchaSolver(object):
         """
 
         data = self.backend.get_check_solution_request_data(captcha_id)
-        response = request(data['url'], data['post_data'])
+        response = request(data['url'], data['post_data'],
+                           timeout=self.network_config['timeout'])
         return self.backend.parse_check_solution_response(response)
 
     def solve_captcha(self, data, submiting_time=30, submiting_delay=3,
                       recognition_time=120, recognition_delay=5, **kwargs):
 
-        delay = submiting_delay or 1
-        for _ in range(0, submiting_time, delay):
+        assert submiting_delay > 0
+        assert recognition_delay > 0
+
+        for _ in range(0, submiting_time, submiting_delay):
+            fail = None
             try:
                 captcha_id = self.submit_captcha(image_data=data, **kwargs)
-                break
-            except ServiceTooBusy:
+            except (ServiceTooBusy, URLError, socket.error) as ex:
+                fail = ex
                 time.sleep(submiting_delay)
+            else:
+                break
         else:
-            raise SolutionTimeoutError("Service has not available slots after "
-                                       "%s seconds" % submiting_time)
+            if isinstance(fail, ServiceTooBusy):
+                raise SolutionTimeoutError('Service has not available slots'
+                                           ' after %s seconds'
+                                           % submiting_time)
+            else:
+                raise SolutionTimeoutError('Service is not available.'
+                                           ' Error: %s' % ex)
 
-        delay = recognition_delay or 1
-        for _ in range(0, recognition_time, delay):
+        for _ in range(0, recognition_time, recognition_delay):
+            fail = None
             try:
                 return self.check_solution(captcha_id)
-            except SolutionNotReady:
+            except (SolutionNotReady, ServiceTooBusy,
+                    URLError, socket.error) as ex:
+                fail = ex
                 time.sleep(recognition_delay)
-        raise SolutionTimeoutError("Captcha is not ready after "
-                                   "%s seconds" % recognition_time)
+            else:
+                break
+        else:
+            if isinstance(fail, (ServiceTooBusy, SolutionNotReady)):
+                raise SolutionTimeoutError('Captcha is not ready after'
+                                           ' %s seconds' % recognition_time)
+            else:
+                raise SolutionTimeoutError('Service is not available.'
+                                           ' Error: %s' % ex)
