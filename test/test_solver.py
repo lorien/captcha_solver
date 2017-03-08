@@ -130,7 +130,7 @@ class AntigateTestCase(BaseSolverTestCase):
                     server.write(b'OK|captcha_id')
                     server.finish()
                 elif self.step == 2:
-                    time.sleep(1)
+                    time.sleep(1.1)
                     server.write(b'that would be timed out')
                     server.finish()
                 elif self.step == 3:
