@@ -114,12 +114,13 @@ class AntigateTestCase(BaseSolverTestCase):
         solver = self.create_solver()
         solver.setup_network_config(timeout=1)
         self.server.response['data'] = handler()
-        self.server.response_once['sleep'] = 1.1
+        self.server.response_once['sleep'] = 1.005
         delays = copy(NO_DELAY)
         delays.update(dict(submiting_time=2, submiting_delay=1))
         solver.solve_captcha(b'image_data', **delays)
 
     def test_network_error_while_receiving_solution(self):
+
         class Callback(object):
             def __init__(self):
                 self.step = 0
@@ -129,11 +130,11 @@ class AntigateTestCase(BaseSolverTestCase):
                 if self.step == 1:
                     server.write(b'OK|captcha_id')
                     server.finish()
-                elif self.step == 2:
-                    time.sleep(1.1)
+                elif self.step in (2, 3, 4):
+                    time.sleep(1.005)
                     server.write(b'that would be timed out')
                     server.finish()
-                elif self.step == 3:
+                elif self.step > 4:
                     server.write(b'OK|solution')
                     server.finish()
 
@@ -142,6 +143,6 @@ class AntigateTestCase(BaseSolverTestCase):
         self.server.response['callback'] = Callback()
         delays = copy(NO_DELAY)
         delays.update(dict(submiting_time=2, submiting_delay=1,
-                           recognition_time=2, recognition_delay=1))
+                           recognition_time=4, recognition_delay=1))
         solution = solver.solve_captcha(b'image_data', **delays)
         assert solution == 'solution'
