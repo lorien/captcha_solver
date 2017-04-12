@@ -62,6 +62,6 @@ CaptchaSolutions Backend Example
 
     from captcha_solver import CaptchaSolver
 
-    solver = CaptchaSolver('captchasolutions', api_key='CAPTCHASOLUTIONS_API_KEY', secret_key='CAPTCHASOLUTIONS_SECRET_KEY')
+    solver = CaptchaSolver('captchasolutions', api_key='CAPTCHASOLUTIONS_API_KEY')
     raw_data = open('captcha.png', 'rb').read()
     print(solver.solve_captcha(raw_data))    
