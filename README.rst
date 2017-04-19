@@ -64,4 +64,4 @@ CaptchaSolutions Backend Example
 
     solver = CaptchaSolver('captchasolutions', api_key='CAPTCHASOLUTIONS_API_KEY')
     raw_data = open('captcha.png', 'rb').read()
-    print(solver.solve_captcha(raw_data))    
+    print(solver.solve_captcha(raw_data))
