@@ -12,12 +12,13 @@ NO_DELAY = {'recognition_time': 1,
             'recognition_delay': 1,
             'submiting_time': 1,
             'submiting_delay': 1}
-
+TEST_SERVER_PORT = 9876
+TEST_SERVER_HOST = '127.0.0.1'
 
 class BaseSolverTestCase(TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.server = TestServer()
+        cls.server = TestServer(address=TEST_SERVER_HOST, port=TEST_SERVER_PORT)
         cls.server.start()
 
     @classmethod
@@ -125,18 +126,24 @@ class AntigateTestCase(BaseSolverTestCase):
             def __init__(self):
                 self.step = 0
 
-            def __call__(self, server):
+            def __call__(self):
                 self.step += 1
                 if self.step == 1:
-                    server.write(b'OK|captcha_id')
-                    server.finish()
+                    return {
+                        'type': 'response',
+                        'body': b'OK|captcha_id',
+                    }
                 elif self.step in (2, 3, 4):
                     time.sleep(1.005)
-                    server.write(b'that would be timed out')
-                    server.finish()
+                    return {
+                        'type': 'response',
+                        'body': b'that will be timeout',
+                    }
                 elif self.step > 4:
-                    server.write(b'OK|solution')
-                    server.finish()
+                    return {
+                        'type': 'response',
+                        'body': b'OK|solution',
+                    }
 
         solver = self.create_solver()
         solver.setup_network_config(timeout=1)
