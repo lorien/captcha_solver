@@ -5,7 +5,7 @@ ROOT = os.path.dirname(os.path.realpath(__file__))
 
 setup(
     name = 'captcha-solver',
-    version = '0.1.1',
+    version = '0.1.2',
     author = 'Gregory Petukhov',
     author_email = 'lorien@lorien.name',
     maintainer='Gregory Petukhov',
