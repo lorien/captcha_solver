@@ -1,3 +1,4 @@
+from pprint import pprint
 import logging
 import time
 import socket
@@ -10,14 +11,16 @@ from .error import (SolutionNotReady, SolutionTimeoutError,
 from .network import request
 from .backend.antigate import AntigateBackend
 from .backend.rucaptcha import RucaptchaBackend
+from .backend.twocaptcha import TwocaptchaBackend
 from .backend.browser import BrowserBackend
 from .backend.gui import GuiBackend
 from .backend.base import ServiceBackend
 
 logger = logging.getLogger('captcha_solver')
 BACKEND_ALIAS = {
-    'antigate': AntigateBackend,
+    '2captcha': TwocaptchaBackend,
     'rucaptcha': RucaptchaBackend,
+    'antigate': AntigateBackend,
     'browser': BrowserBackend,
     'gui': GuiBackend,
 }
@@ -57,10 +60,16 @@ class CaptchaSolver(object):
 
     def submit_captcha(self, image_data, **kwargs):
         logger.debug('Submiting captcha')
-        data = self.backend.get_submit_captcha_request_data(image_data,
-                                                            **kwargs)
-        response = request(data['url'], data['post_data'],
-                           timeout=self.network_config['timeout'])
+        data = self.backend.get_submit_captcha_request_data(
+            image_data, **kwargs
+        )
+        #pprint(data['post_data'])
+        #print('URL: %s' % data['url'])
+        response = request(
+            data['url'],
+            data['post_data'],
+            timeout=self.network_config['timeout']
+        )
         return self.backend.parse_submit_captcha_response(response)
 
     def check_solution(self, captcha_id):
@@ -71,8 +80,11 @@ class CaptchaSolver(object):
         """
 
         data = self.backend.get_check_solution_request_data(captcha_id)
-        response = request(data['url'], data['post_data'],
-                           timeout=self.network_config['timeout'])
+        response = request(
+            data['url'],
+            data['post_data'],
+            timeout=self.network_config['timeout'],
+        )
         return self.backend.parse_check_solution_response(response)
 
     def solve_captcha(self, data, submiting_time=30, submiting_delay=3,
