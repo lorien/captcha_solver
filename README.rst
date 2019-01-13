@@ -23,7 +23,7 @@ Installation
 Twocaptcha Backend Example
 ==========================
 
-Service website is https://2captcha.com
+Service website is https://2captcha.com?from=3019071
 
 .. code:: python
 
@@ -37,7 +37,7 @@ Service website is https://2captcha.com
 Rucaptcha Backend Example
 =========================
 
-Service website is https://rucaptcha.com
+Service website is https://rucaptcha.com?from=3019071
 
 .. code:: python
 
