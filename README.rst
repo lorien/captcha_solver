@@ -63,7 +63,7 @@ Browser Backend Example
 Antigate Backend Example
 ========================
 
-Service website is https://anti-captcha.com
+Service website is http://getcaptchasolution.com/ijykrofoxz
 
 .. code:: python
 
