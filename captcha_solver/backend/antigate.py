@@ -6,6 +6,9 @@ from ..error import (CaptchaServiceError, ServiceTooBusy,
                      BalanceTooLow, SolutionNotReady)
 
 
+SOFTWARE_ID = 901
+
+
 class AntigateBackend(ServiceBackend):
     def setup(self, api_key, service_url='http://antigate.com', **kwargs):
         self.api_key = api_key
@@ -16,6 +19,7 @@ class AntigateBackend(ServiceBackend):
             'key': self.api_key,
             'method': 'base64',
             'body': b64encode(data).decode('ascii'),
+            'soft_id': SOFTWARE_ID,
         }
         post.update(kwargs)
         url = urljoin(self.service_url, 'in.php')
