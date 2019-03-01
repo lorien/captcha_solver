@@ -1,0 +1,12 @@
+[flake8]
+
+# E121, E123, E125 are handled by pylint
+# E123 - closing bracket does not match indentation of opening bracket's line
+# E121 - continuation line under-indented for hanging indent
+# E125 - continuation line with same indent as next logical line
+
+# F401 is handled by pylint
+# F401 - imported but unused
+# F403 - unable to detect undefined names
+
+ignore = E121,E123,E125,E261,E265,W503,F401,F403

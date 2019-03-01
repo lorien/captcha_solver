@@ -1,10 +1,10 @@
-from pprint import pprint
+from pprint import pprint, pformat # pylint: disable=unused-import
 import logging
 import time
 import socket
 
 import six
-from six.moves.urllib.error import URLError
+from six.moves.urllib.error import URLError # pylint: disable=relative-import
 
 from .error import (SolutionNotReady, SolutionTimeoutError,
                     ServiceTooBusy, InvalidServiceBackend)
@@ -16,7 +16,7 @@ from .backend.browser import BrowserBackend
 from .backend.gui import GuiBackend
 from .backend.base import ServiceBackend
 
-logger = logging.getLogger('captcha_solver')
+LOGGER = logging.getLogger('captcha_solver')
 BACKEND_ALIAS = {
     '2captcha': TwocaptchaBackend,
     'rucaptcha': RucaptchaBackend,
@@ -59,7 +59,7 @@ class CaptchaSolver(object):
             raise InvalidServiceBackend('Invalid backend: %s' % backend)
 
     def submit_captcha(self, image_data, **kwargs):
-        logger.debug('Submiting captcha')
+        LOGGER.debug('Submiting captcha')
         data = self.backend.get_submit_captcha_request_data(
             image_data, **kwargs
         )

@@ -1,4 +1,4 @@
-.PHONY: flake flake_verbose coverage clean upload
+.PHONY: flake flake_verbose coverage clean upload pylint flake8 lint test
 
 flake:
 	flake8 captcha_solver test
@@ -17,3 +17,14 @@ clean:
 
 upload:
 	git push --tags; python setup.py sdist upload
+
+pylint:
+	pylint captcha_solver
+
+flake8:
+	flake8 captcha_solver
+
+lint: pylint flake8
+
+test:
+	pytest

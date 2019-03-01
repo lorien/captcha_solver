@@ -2,6 +2,7 @@ from unittest import TestCase
 from copy import copy
 import time
 
+import pytest
 from six import string_types
 from test_server import TestServer
 

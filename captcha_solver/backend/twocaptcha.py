@@ -9,6 +9,8 @@ class TwocaptchaBackend(AntigateBackend):
 
     def get_submit_captcha_request_data(self, data, **kwargs):
         # res is {url: ..., post_data: ...}
-        res = super(TwocaptchaBackend, self).get_submit_captcha_request_data(data, **kwargs)
+        res = super(TwocaptchaBackend, self).get_submit_captcha_request_data(
+            data, **kwargs
+        )
         res['post_data']['soft_id'] = SOFTWARE_ID
         return res

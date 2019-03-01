@@ -10,6 +10,7 @@ class CaptchaWindow(object):
 
         pygtk.require('2.0')
         self.solution = solution
+        # pylint: disable=no-member
         self.window = gtk.Window(gtk.WINDOW_TOPLEVEL)
         self.window.show()
         self.window.connect('destroy', self.destroy)
@@ -31,12 +32,13 @@ class CaptchaWindow(object):
         self.entry.show()
         self.entry.grab_focus()
 
-    def destroy(self, *args):
+    def destroy(self, *args): # pylint: disable=unused-argument
         import gtk
 
+        # pylint: disable=no-member
         gtk.main_quit()
 
-    def solve(self, *args):
+    def solve(self, *args): # pylint: disable=unused-argument
         import gtk
 
         solution = self.entry.get_text()
@@ -44,11 +46,13 @@ class CaptchaWindow(object):
             solution = solution.decode('utf8')
         self.solution.append(solution)
         self.window.hide()
+        # pylint: disable=no-member
         gtk.main_quit()
 
     def main(self):
         import gtk
 
+        # pylint: disable=no-member
         gtk.main()
 
 
