@@ -153,3 +153,14 @@ class AntigateTestCase(BaseSolverTestCase):
                            recognition_time=4, recognition_delay=1))
         solution = solver.solve_captcha(b'image_data', **delays)
         assert solution == 'solution'
+
+    def test_timeout(self):
+        solver = self.create_solver()
+        solver.setup_network_config(timeout=1)
+        self.server.response_once['sleep'] = 1.1
+        self.server.response['data'] = 'OK|foo'
+        delays = copy(NO_DELAY)
+        delays['submiting_time'] = 1
+        delays['submiting_delay'] = 1
+        with pytest.raises(error.SolutionTimeoutError):
+            solver.solve_captcha(b'image_data', **delays)

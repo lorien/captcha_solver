@@ -109,7 +109,7 @@ class CaptchaSolver(object):
                                            % submiting_time)
             else:
                 raise SolutionTimeoutError('Service is not available.'
-                                           ' Error: %s' % ex)
+                                           ' Error: %s' % fail)
 
         for _ in range(0, recognition_time, recognition_delay):
             fail = None
@@ -127,4 +127,4 @@ class CaptchaSolver(object):
                                            ' %s seconds' % recognition_time)
             else:
                 raise SolutionTimeoutError('Service is not available.'
-                                           ' Error: %s' % ex)
+                                           ' Error: %s' % fail)
