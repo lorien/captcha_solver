@@ -12,12 +12,14 @@ from .network import request
 from .backend.antigate import AntigateBackend
 from .backend.rucaptcha import RucaptchaBackend
 from .backend.twocaptcha import TwocaptchaBackend
+from .backend.captchasio import CaptchasIOBackend
 from .backend.browser import BrowserBackend
 from .backend.gui import GuiBackend
 from .backend.base import ServiceBackend
 
 LOGGER = logging.getLogger('captcha_solver')
 BACKEND_ALIAS = {
+    'captchasio': CaptchasIOBackend,
     '2captcha': TwocaptchaBackend,
     'rucaptcha': RucaptchaBackend,
     'antigate': AntigateBackend,

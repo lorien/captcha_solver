@@ -19,6 +19,18 @@ Installation
 
     pip install captcha-solver
 
+CAPTCHAs.IO Backend Example
+==========================
+
+Service website is https://captchas.io/
+
+.. code:: python
+
+    from captcha_solver import CaptchaSolver
+
+    solver = CaptchaSolver('captchasio', api_key='CAPTCHAs.IO API HERE')
+    raw_data = open('captcha.png', 'rb').read()
+    print(solver.solve_captcha(raw_data))
 
 Twocaptcha Backend Example
 ==========================
