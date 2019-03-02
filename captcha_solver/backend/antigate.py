@@ -1,21 +1,34 @@
 from base64 import b64encode
+# pylint: disable=relative-import
 from six.moves.urllib.parse import urlencode, urljoin
+# pylint: enable=relative-import
 
 from .base import ServiceBackend
 from ..error import (CaptchaServiceError, ServiceTooBusy,
                      BalanceTooLow, SolutionNotReady)
 
 
+SOFTWARE_ID = 901
+
+
 class AntigateBackend(ServiceBackend):
+    def __init__(self, *args, **kwargs):
+        super(AntigateBackend, self).__init__(*args, **kwargs)
+        self.api_key = None
+        self.service_url = None
+
+    # pylint: disable=arguments-differ
     def setup(self, api_key, service_url='http://antigate.com', **kwargs):
         self.api_key = api_key
         self.service_url = service_url
+    # pylint: enable=arguments-differ
 
     def get_submit_captcha_request_data(self, data, **kwargs):
         post = {
             'key': self.api_key,
             'method': 'base64',
             'body': b64encode(data).decode('ascii'),
+            'soft_id': SOFTWARE_ID,
         }
         post.update(kwargs)
         url = urljoin(self.service_url, 'in.php')

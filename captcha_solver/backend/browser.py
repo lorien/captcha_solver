@@ -2,9 +2,10 @@ import tempfile
 import webbrowser
 import time
 import os
-from six.moves import input
 import sys
 import locale
+
+from six.moves import input
 
 from .base import ServiceBackend
 
@@ -14,6 +15,7 @@ class BrowserBackend(ServiceBackend):
         fd, path = tempfile.mkstemp()
         with open(path, 'wb') as out:
             out.write(data)
+        os.close(fd)
         url = 'file://' + path
         return {'url': url, 'post_data': None}
 
