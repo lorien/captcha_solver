@@ -1,5 +1,5 @@
 ==============
-Captcha Solver
+🇷🇺 Captcha Solver
 ==============
 
 .. image:: https://travis-ci.org/lorien/captcha_solver.png?branch=master
