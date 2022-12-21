@@ -105,9 +105,11 @@ class CaptchaSolver:
         start_time = time.time()
         while True:
             try:
+                print("AAA", time.time(), start_time, submiting_time)
                 return self.submit_captcha(image_data=data, **kwargs)
             except (ServiceTooBusy, URLError, TimeoutError) as ex:
                 fail = ex
+                print("AAA!!!", time.time(), start_time, submiting_time)
                 if ((time.time() + submiting_delay) - start_time) > submiting_time:
                     break
                 time.sleep(submiting_delay)
@@ -124,8 +126,10 @@ class CaptchaSolver:
         start_time = time.time()
         while True:
             try:
+                print("BBB", time.time(), start_time, recognition_time)
                 return self.check_solution(captcha_id)
             except (SolutionNotReady, TimeoutError, ServiceTooBusy, URLError) as ex:
+                print("BBB!!!", time.time(), start_time, recognition_time)
                 fail = ex
                 if ((time.time() + recognition_delay) - start_time) > recognition_time:
                     break
