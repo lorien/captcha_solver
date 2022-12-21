@@ -22,7 +22,7 @@ clean:
 	find -name '__pycache__' -delete
 
 pytest:
-	pytest --cov captcha_solver --cov-report term-missing
+	pytest -k test_network_error_while_sending_captcha --cov captcha_solver --cov-report term-missing
 
 test:
 	make check \
