@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import socket
 import time
 from copy import copy
 from pprint import pprint  # pylint: disable=unused-import
@@ -104,9 +105,10 @@ class CaptchaSolver:
         fail: None | Exception = None
         start_time = time.time()
         while True:
+            # pylint: disable=overlapping-except
             try:
                 return self.submit_captcha(image_data=data, **kwargs)
-            except (ServiceTooBusy, URLError, TimeoutError) as ex:
+            except (ServiceTooBusy, URLError, socket.error, TimeoutError) as ex:
                 fail = ex
                 if ((time.time() + submiting_delay) - start_time) > submiting_time:
                     break
@@ -123,9 +125,16 @@ class CaptchaSolver:
         fail: None | Exception = None
         start_time = time.time()
         while True:
+            # pylint: disable=overlapping-except
             try:
                 return self.check_solution(captcha_id)
-            except (SolutionNotReady, TimeoutError, ServiceTooBusy, URLError) as ex:
+            except (
+                SolutionNotReady,
+                socket.error,
+                TimeoutError,
+                ServiceTooBusy,
+                URLError,
+            ) as ex:
                 fail = ex
                 if ((time.time() + recognition_delay) - start_time) > recognition_time:
                     break
