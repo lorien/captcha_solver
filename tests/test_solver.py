@@ -100,16 +100,16 @@ class AntigateTestCase(BaseSolverTestCase):
             self.solver.solve_captcha(b"image_data", **TESTING_TIME_PARAMS)
 
     def test_network_error_while_sending_captcha(self):
-        self.server.add_response(Response(data=b"that would be timeout", sleep=0.2))
+        self.server.add_response(Response(data=b"that would be timeout", sleep=0.5))
         self.server.add_response(Response(data=b"OK|captcha_id"))
         self.server.add_response(Response(data=b"OK|solution"))
 
         solver = self.create_solver()
-        solver.setup_network_config(timeout=0.1)
+        solver.setup_network_config(timeout=0.4)
         solver.solve_captcha(
             b"image_data",
-            submiting_time=0.5,
-            submiting_delay=0.15,
+            submiting_time=2,
+            submiting_delay=0,
             recognition_time=0,
             recognition_delay=0,
         )
