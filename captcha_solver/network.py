@@ -1,25 +1,43 @@
-# pylint: disable=import-error,relative-import
-from six.moves.urllib.request import urlopen, Request
-from six.moves.urllib.error import HTTPError
-from six.moves.urllib.parse import urlencode
-# pylint: enable=import-error,relative-import
+from __future__ import annotations
+
+import typing
+from collections.abc import Mapping
+from urllib.error import HTTPError
+from urllib.parse import urlencode
+from urllib.request import Request, urlopen
+
+from typing_extensions import TypedDict
 
 
-def request(url, data, timeout):
-    if data:
-        req_data = urlencode(data).encode('ascii')
-    else:
-        req_data = None
+# pylint: disable=consider-alternative-union-syntax,deprecated-typing-alias
+class NetworkRequest(TypedDict):
+    url: str
+    post_data: typing.Optional[typing.MutableMapping[str, str | float]]
+
+
+# pylint: enable=consider-alternative-union-syntax,deprecated-typing-alias
+
+
+class NetworkResponse(TypedDict):
+    code: int
+    body: bytes
+    url: str
+
+
+def request(
+    url: str, data: None | Mapping[str, str | float], timeout: float
+) -> NetworkResponse:
+    req_data = urlencode(data).encode("ascii") if data else None
     req = Request(url, req_data)
     try:
-        response = urlopen(req, timeout=timeout)
-        body = response.read()
-        code = response.getcode()
+        with urlopen(req, timeout=timeout) as resp:  # nosec B310
+            body = resp.read()
+            code = resp.getcode()
     except HTTPError as ex:
         code = ex.code
         body = ex.fp.read()
     return {
-        'code': code,
-        'body': body,
-        'url': url,
+        "code": code,
+        "body": body,
+        "url": url,
     }

@@ -1,130 +1,157 @@
-from pprint import pprint, pformat # pylint: disable=unused-import
+from __future__ import annotations
+
 import logging
 import time
-import socket
+from copy import copy
+from pprint import pprint  # pylint: disable=unused-import
+from typing import Any
+from urllib.error import URLError
 
-import six
-from six.moves.urllib.error import URLError # pylint: disable=relative-import
+from typing_extensions import TypedDict
 
-from .error import (SolutionNotReady, SolutionTimeoutError,
-                    ServiceTooBusy, InvalidServiceBackend)
-from .network import request
 from .backend.antigate import AntigateBackend
+from .backend.base import ServiceBackend
+from .backend.browser import BrowserBackend
 from .backend.rucaptcha import RucaptchaBackend
 from .backend.twocaptcha import TwocaptchaBackend
-from .backend.browser import BrowserBackend
-from .backend.gui import GuiBackend
-from .backend.base import ServiceBackend
+from .error import (
+    InvalidServiceBackend,
+    ServiceTooBusy,
+    SolutionNotReady,
+    SolutionTimeoutError,
+)
+from .network import request
 
-LOGGER = logging.getLogger('captcha_solver')
-BACKEND_ALIAS = {
-    '2captcha': TwocaptchaBackend,
-    'rucaptcha': RucaptchaBackend,
-    'antigate': AntigateBackend,
-    'browser': BrowserBackend,
-    'gui': GuiBackend,
+LOGGER = logging.getLogger("captcha_solver")
+BACKEND_ALIAS: dict[str, type[ServiceBackend]] = {
+    "2captcha": TwocaptchaBackend,
+    "rucaptcha": RucaptchaBackend,
+    "antigate": AntigateBackend,
+    "browser": BrowserBackend,
 }
-DEFAULT_NETWORK_TIMEOUT = 5
+
+
+class NetworkConfig(TypedDict):
+    timeout: float
+
+
+DEFAULT_NETWORK_CONFIG: NetworkConfig = {
+    "timeout": 5,
+}
 
 
 class InvalidBackend(Exception):
     pass
 
 
-class CaptchaSolver(object):
-    """
-    This class implements API to communicate with
-    remote captcha solving service.
-    """
+class CaptchaSolver:
+    """This class implements API to communicate with remote captcha solving service."""
 
-    def __init__(self, backend, **kwargs):
+    def __init__(self, backend: str | type[ServiceBackend], **kwargs: Any) -> None:
+        """Create CaptchaSolver instance.
+
+        Parameters
+        ----------
+        backend : string | ServiceBackend subclass
+            Alias name of one of standard backends or class inherited from SolverBackend
         """
-        :param backend: alias name of one of standard backends or
-            class inherited from SolverBackend
-        """
-        self.backend = self._initialize_backend(backend)
-        self.backend.setup(**kwargs)
-        self.network_config = {}
-        self.setup_network_config()
+        backend_cls = self.get_backend_class(backend)
+        self.backend = backend_cls(**kwargs)
+        self.network_config: NetworkConfig = copy(DEFAULT_NETWORK_CONFIG)
 
-    def setup_network_config(self, timeout=DEFAULT_NETWORK_TIMEOUT):
-        self.network_config['timeout'] = timeout
+    def setup_network_config(self, timeout: None | int = None) -> None:
+        if timeout is not None:
+            self.network_config["timeout"] = timeout
 
-    def _initialize_backend(self, backend):
-        if isinstance(backend, ServiceBackend):
-            return backend()
-        elif isinstance(backend, six.string_types):
-            return BACKEND_ALIAS[backend]()
-        else:
-            raise InvalidServiceBackend('Invalid backend: %s' % backend)
+    def get_backend_class(
+        self, alias: str | type[ServiceBackend]
+    ) -> type[ServiceBackend]:
+        if isinstance(alias, str):
+            return BACKEND_ALIAS[alias]
+        if issubclass(alias, ServiceBackend):
+            return alias
+        raise InvalidServiceBackend("Invalid backend alias: %s" % alias)
 
-    def submit_captcha(self, image_data, **kwargs):
-        LOGGER.debug('Submiting captcha')
-        data = self.backend.get_submit_captcha_request_data(
-            image_data, **kwargs
-        )
-        #pprint(data['post_data'])
-        #print('URL: %s' % data['url'])
+    def submit_captcha(self, image_data: bytes, **kwargs: Any) -> str:
+        LOGGER.debug("Submiting captcha")
+        data = self.backend.get_submit_captcha_request_data(image_data, **kwargs)
+        # pprint(data['post_data'])
+        # print('URL: %s' % data['url'])
         response = request(
-            data['url'],
-            data['post_data'],
-            timeout=self.network_config['timeout']
+            data["url"], data["post_data"], timeout=self.network_config["timeout"]
         )
         return self.backend.parse_submit_captcha_response(response)
 
-    def check_solution(self, captcha_id):
-        """
-        Raises:
-        * SolutionNotReady
-        * ServiceTooBusy
-        """
+    def check_solution(self, captcha_id: str) -> str:
+        """Check if service has solved requested captcha.
 
+        Raises
+        ------
+        - SolutionNotReady
+        - ServiceTooBusy
+        """
         data = self.backend.get_check_solution_request_data(captcha_id)
         response = request(
-            data['url'],
-            data['post_data'],
-            timeout=self.network_config['timeout'],
+            data["url"],
+            data["post_data"],
+            timeout=self.network_config["timeout"],
         )
         return self.backend.parse_check_solution_response(response)
 
-    def solve_captcha(self, data, submiting_time=30, submiting_delay=3,
-                      recognition_time=120, recognition_delay=5, **kwargs):
-
-        assert submiting_delay > 0
-        assert recognition_delay > 0
-
-        for _ in range(0, submiting_time, submiting_delay):
-            fail = None
+    def submit_captcha_with_retry(
+        self, submiting_time: float, submiting_delay: float, data: bytes, **kwargs: Any
+    ) -> str:
+        fail: None | Exception = None
+        start_time = time.time()
+        while True:
             try:
-                captcha_id = self.submit_captcha(image_data=data, **kwargs)
-            except (ServiceTooBusy, URLError, socket.error) as ex:
+                return self.submit_captcha(image_data=data, **kwargs)
+            except (ServiceTooBusy, URLError, TimeoutError) as ex:
                 fail = ex
+                if ((time.time() + submiting_delay) - start_time) > submiting_time:
+                    break
                 time.sleep(submiting_delay)
-            else:
-                break
-        else:
-            if isinstance(fail, ServiceTooBusy):
-                raise SolutionTimeoutError('Service has not available slots'
-                                           ' after %s seconds'
-                                           % submiting_time)
-            else:
-                raise SolutionTimeoutError('Service is not available.'
-                                           ' Error: %s' % fail)
+        if isinstance(fail, ServiceTooBusy):
+            raise SolutionTimeoutError("Service has no available slots") from fail
+        raise SolutionTimeoutError(
+            "Could not access the service, reason: {}".format(fail)
+        ) from fail
 
-        for _ in range(0, recognition_time, recognition_delay):
-            fail = None
+    def check_solution_with_retry(
+        self, recognition_time: float, recognition_delay: float, captcha_id: str
+    ) -> str:
+        fail: None | Exception = None
+        start_time = time.time()
+        while True:
             try:
                 return self.check_solution(captcha_id)
-            except (SolutionNotReady, ServiceTooBusy,
-                    URLError, socket.error) as ex:
+            except (SolutionNotReady, TimeoutError, ServiceTooBusy, URLError) as ex:
                 fail = ex
+                if ((time.time() + recognition_delay) - start_time) > recognition_time:
+                    break
                 time.sleep(recognition_delay)
-            else:
-                break
-        else:
-            if isinstance(fail, (ServiceTooBusy, SolutionNotReady)):
-                raise SolutionTimeoutError('Captcha is not ready after'
-                                           ' %s seconds' % recognition_time)
-            else:
-                raise SolutionTimeoutError('Service is not available.'
-                                           ' Error: %s' % fail)
+        if isinstance(fail, (ServiceTooBusy, SolutionNotReady)):
+            raise SolutionTimeoutError(
+                "Captcha is not ready after" " %s seconds" % recognition_time
+            )
+        raise SolutionTimeoutError("Service is not available." " Error: %s" % fail)
+
+    def solve_captcha(
+        self,
+        data: bytes,
+        submiting_time: float = 30,
+        submiting_delay: float = 3,
+        recognition_time: float = 120,
+        recognition_delay: float = 5,
+        **kwargs: Any,
+    ) -> str:
+        assert submiting_time >= 0
+        assert submiting_delay >= 0
+        assert recognition_time >= 0
+        assert recognition_delay >= 0
+        captcha_id = self.submit_captcha_with_retry(
+            submiting_time, submiting_delay, data, **kwargs
+        )
+        return self.check_solution_with_retry(
+            recognition_time, recognition_delay, captcha_id
+        )

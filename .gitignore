@@ -1,22 +1,22 @@
-# Common
 *.pyc
 *.pyo
 *.swp
 *.swo
 *.orig
-*.egg-info
-.idea
 
-# Project specific
+/web/settings_local.py
+pip-log.txt
 /.env
-/pip-log.txt
 /var/
-/.tox/
+/dump/
+/src/
+/ioweb
+/.hg/
+/.pytest_cache/
+/build/
 /.coverage
+/.tox/
+*.egg-info
 /dist/
 /build/
-/.cache/
-/captcha.jpg
-/test.py
-/var/
-/.pytest_cache/
+/.coverage

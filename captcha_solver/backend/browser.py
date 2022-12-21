@@ -1,40 +1,41 @@
-import tempfile
-import webbrowser
-import time
+from __future__ import annotations
+
 import os
-import sys
-import locale
+import tempfile
+import time
+import webbrowser
+from typing import Any
 
-from six.moves import input
-
+from ..network import NetworkRequest, NetworkResponse
 from .base import ServiceBackend
 
 
 class BrowserBackend(ServiceBackend):
-    def get_submit_captcha_request_data(self, data):
+    def setup(self, **_kwargs: Any) -> None:
+        pass
+
+    def get_submit_captcha_request_data(
+        self, data: bytes, **kwargs: Any
+    ) -> NetworkRequest:
         fd, path = tempfile.mkstemp()
-        with open(path, 'wb') as out:
+        with open(path, "wb") as out:
             out.write(data)
         os.close(fd)
-        url = 'file://' + path
-        return {'url': url, 'post_data': None}
+        url = "file://" + path
+        return {"url": url, "post_data": None}
 
-    def parse_submit_captcha_response(self, res):
-        return res['url'].replace('file://', '')
+    def parse_submit_captcha_response(self, res: NetworkResponse) -> str:
+        return res["url"].replace("file://", "")
 
-    def get_check_solution_request_data(self, captcha_id):
-        url = 'file://' + captcha_id
-        return {'url': url, 'post_data': None}
+    def get_check_solution_request_data(self, captcha_id: str) -> NetworkRequest:
+        url = "file://" + captcha_id
+        return {"url": url, "post_data": None}
 
-    def parse_check_solution_response(self, res):
-        webbrowser.open(url=res['url'])
+    def parse_check_solution_response(self, res: NetworkResponse) -> str:
+        webbrowser.open(url=res["url"])
         # Wait some time, skip some debug messages
         # which browser could dump to console
         time.sleep(0.5)
-        solution = input('Enter solution: ')
-        if hasattr(solution, 'decode'):
-            solution = solution.decode(sys.stdin.encoding or
-                                       locale.getpreferredencoding(True))
-        path = res['url'].replace('file://', '')
+        path = res["url"].replace("file://", "")
         os.unlink(path)
-        return solution
+        return input("Enter solution: ")
