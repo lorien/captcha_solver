@@ -1,4 +1,4 @@
-# captcha\_solver Documentation
+# Captcha Solver Documentation
 
 [![Test Status](https://github.com/lorien/captcha_solver/actions/workflows/test.yml/badge.svg)](https://github.com/lorien/captcha_solver/actions/workflows/test.yml)
 [![Code Quality](https://github.com/lorien/captcha_solver/actions/workflows/check.yml/badge.svg)](https://github.com/lorien/captcha_solver/actions/workflows/test.yml)
