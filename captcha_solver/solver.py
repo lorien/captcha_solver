@@ -10,7 +10,7 @@ from urllib.error import URLError
 
 from typing_extensions import TypedDict
 try:
-    import deathbycaptcha
+    from deathbycaptcha import deathbycaptcha
 except ImportError:
     deathbycaptcha = None
 
