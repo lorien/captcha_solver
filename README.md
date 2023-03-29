@@ -58,3 +58,15 @@ solver = CaptchaSolver('antigate', api_key='ANTIGATE_KEY')
 raw_data = open('captcha.png', 'rb').read()
 print(solver.solve_captcha(raw_data))
 ```
+
+## DeathByCaptcha Backend Example
+
+Service website is http://getcaptchasolution.com/ijykrofoxz
+
+```python
+from captcha_solver import CaptchaSolver
+
+solver = DeathByCaptchaSolver(username="username", password='password')
+raw_data = open('captcha.png', 'rb').read()
+print(solver.solve_captcha(raw_data))
+```

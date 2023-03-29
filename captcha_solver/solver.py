@@ -9,6 +9,10 @@ from typing import Any
 from urllib.error import URLError
 
 from typing_extensions import TypedDict
+try:
+    from deathbycaptcha import deathbycaptcha
+except ImportError:
+    deathbycaptcha = None
 
 from .backend.antigate import AntigateBackend
 from .backend.base import ServiceBackend
@@ -164,3 +168,12 @@ class CaptchaSolver:
         return self.check_solution_with_retry(
             recognition_time, recognition_delay, captcha_id
         )
+
+class DeathByCaptchaSolver(deathbycaptcha.HttpClient):
+    """
+    Official deathbycaptcha client interface modified to work the same as 
+    the CaptchaSolver class
+    """
+
+    def solve_captcha(self, data, timeout, **kwargs):
+        return self.decode(data, timeout, **kwargs)
