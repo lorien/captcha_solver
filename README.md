@@ -9,6 +9,10 @@
 Univeral API to work with captcha solving services.
 
 Feel free to give feedback in Telegram groups: [@grablab](https://t.me/grablab) and [@grablab\_ru](https://t.me/grablab_ru)
+## Deprecation Notice
+
+**IMPORTANT: THIS PROJECT IS DEPRECATED AND IS IN MAINTAIN-ONLY MODE. PLEASE CONSIDER USING MY OTHER PROJECT [UNICAPTCHA](https://github.com/lorien/unicaptcha) -- IT IS MODERN UNIVERSAL PYTHON INTERFACE TO MULTIPLE ANTI-CAPTCHA SERVICES. THE UNICAPTCHA LIBRARY IS FEATURE RICH AND SUPPORTS ALL/ANY OPTIONS PROVIDED BY ANY SUPPORTED ANTI-CAPTCHA SERVICE.**
+
 
 ## Installation
 
